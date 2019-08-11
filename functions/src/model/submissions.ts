@@ -32,7 +32,7 @@ export const getSubmissionsWithFilter = async (limit: number, uid: string, probl
 	const result: Object[] = [];
 	submissionDocs.docs.forEach((doc) => {
 		const data = doc.data();
-    data.submission_id = doc.id;
+    		data.submission_id = doc.id;
 		result.push(data);
 	});
 	return result;
@@ -100,7 +100,6 @@ export const getOldestUngradedSubmission = async (problem_id: string) => {
 		const submissionDocs = (await queryRef.get()).docs;
 		return submissionDocs[0].data();
 	} catch (error) {
-    console.log(error);
 		throw error;
 	}
 }
