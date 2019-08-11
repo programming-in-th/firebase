@@ -131,3 +131,17 @@ export const makeSubmission = async (uid: string, problem_id: string, code: stri
 		throw error;
 	}
 }
+
+export const updateSubmissionStatus = async (submission_id: string, points: number, status: string, time: number, memory: number) => {
+  try {
+    const submissionDocRef = admin.firestore().collection('submissions').doc(submission_id);
+    await submissionDocRef.update({
+      points: points,
+      status: status,
+      time: time,
+      memory: memory
+    });
+  } catch (error) {
+    throw error;
+  }
+}

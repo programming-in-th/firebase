@@ -4,4 +4,4 @@ admin.initializeApp();
 // No need to initialize with service account credentials
 import server from './server';
 
-export const api = functions.https.onRequest(server);
+export const api = functions.region('asia-east2').https.onRequest(server);

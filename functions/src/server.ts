@@ -2,11 +2,10 @@ const express = require('express');
 const cors = require('cors');
 
 import { getTasksWithFilter } from './model/tasks';
-import { getRecentSubmissions, getSubmissionsWithFilter, getDetailedSubmissionData, getOldestUngradedSubmission, makeSubmission } from './model/submissions';
+import { getRecentSubmissions, getSubmissionsWithFilter, getDetailedSubmissionData, getOldestUngradedSubmission, makeSubmission, updateSubmissionStatus } from './model/submissions';
 
 const app = express();
 app.use(cors({ origin: true }));
-// WARNING: Doesn't work with credentials?
 
 /* SUBMISSION RELATED FUNCTIONS */
 app.get('/getRecentSubmissions', async (request: any, response: any) => {
@@ -49,13 +48,24 @@ app.get('/getOldestUngradedSubmission', async (request: any, response: any) => {
 app.post('/makeSubmission', async (request: any, response: any) => {
 	try {
 		await makeSubmission(request.body.uid, request.body.problem_id, request.body.code, request.body.language);
-		response.send('Successfully submitted');
+    response.status(200).send();
 	} catch (error) {
 		response.status(500).send(error);
 	}
 });
 
-// TODO: PATCH (PUT) the submission results from juding server
+app.patch('/updateSubmissionStatus', async (request: any, response: any) => {
+  try {
+    await updateSubmissionStatus(request.body.submission_id,
+                                 parseInt(request.body.points),
+                                 request.body.status,
+                                 parseInt(request.body.time),
+                                 parseInt(request.body.memory));
+    response.status(200).send();
+  } catch (error) {
+    response.status(500).send(error);
+  }
+});
 
 /* TASKS RELATED FUNCTIONS */
 
