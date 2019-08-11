@@ -11,7 +11,7 @@ app.use(cors({ origin: true }));
 /* SUBMISSION RELATED FUNCTIONS */
 app.get('/getRecentSubmissions', async (request: any, response: any) => {
 	try {
-		const result = await getRecentSubmissions(parseInt(request.body.limit));
+		const result = await getRecentSubmissions(parseInt(request.query.limit));
 		response.send(result);
 	} catch (error) {
 		response.status(500).send(error);
@@ -20,7 +20,7 @@ app.get('/getRecentSubmissions', async (request: any, response: any) => {
 
 app.get('/getSubmissionsWithFilter', async (request: any, response: any) => {
 	try {
-		const result = await getSubmissionsWithFilter(parseInt(request.body.limit), request.uid, request.problem_id);
+		const result = await getSubmissionsWithFilter(parseInt(request.query.limit), request.query.uid, request.query.problem_id);
 		response.send(result);
 	} catch (error) {
 		response.status(500).send(error);
@@ -29,7 +29,7 @@ app.get('/getSubmissionsWithFilter', async (request: any, response: any) => {
 
 app.get('/getDetailedSubmissionData', async (request: any, response: any) => {
 	try {
-		const result = await getDetailedSubmissionData(request.body.submission_id);
+		const result = await getDetailedSubmissionData(request.query.submission_id);
 		response.send(result);
 	} catch (error) {
 		response.status(500).send(error);
@@ -38,13 +38,14 @@ app.get('/getDetailedSubmissionData', async (request: any, response: any) => {
 
 app.get('/getOldestUngradedSubmission', async (request: any, response: any) => {
 	try {
-		const result = await getOldestUngradedSubmission(request.body.problem_id);
+		const result = await getOldestUngradedSubmission(request.query.problem_id);
 		response.send(result);
 	} catch (error) {
 		response.status(500).send(error);
 	}
 });
 
+// POST requests must use body property instead of query
 app.post('/makeSubmission', async (request: any, response: any) => {
 	try {
 		await makeSubmission(request.body.uid, request.body.problem_id, request.body.code, request.body.language);
@@ -54,11 +55,13 @@ app.post('/makeSubmission', async (request: any, response: any) => {
 	}
 });
 
+// TODO: PATCH (PUT) the submission results from juding server
+
 /* TASKS RELATED FUNCTIONS */
 
 app.get('/getTasksWithFilter', async (request: any, response: any) => {
 	try {
-		const result = await getTasksWithFilter(parseInt(request.body.limit), parseInt(request.body.min_difficulty), parseInt(request.body.max_difficulty), request.body.tags);
+		const result = await getTasksWithFilter(parseInt(request.query.limit), parseInt(request.query.min_difficulty), parseInt(request.query.max_difficulty), request.query.tags);
 		response.send(result);
 	} catch (error) {
 		response.status(500).send(error);

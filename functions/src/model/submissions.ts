@@ -32,6 +32,7 @@ export const getSubmissionsWithFilter = async (limit: number, uid: string, probl
 	const result: Object[] = [];
 	submissionDocs.docs.forEach((doc) => {
 		const data = doc.data();
+    data.submission_id = doc.id;
 		result.push(data);
 	});
 	return result;
@@ -67,7 +68,6 @@ export const getDetailedSubmissionData = async (submission_id: string) => {
 	await admin.storage().bucket().file("submissions/" + submissionDoc.id).download({ destination: tempPath });
 	console.log("Downloaded code file for submission " + submissionDoc.id + " to " + tempPath);
 	// Read the file
-	// TODO: test if this works
 	const code:string = fs.readFileSync(tempPath, { encoding: "utf8" });
 	const result = { metadata: metadata, code: code, case_results: caseResults };
 	return result;
@@ -100,6 +100,7 @@ export const getOldestUngradedSubmission = async (problem_id: string) => {
 		const submissionDocs = (await queryRef.get()).docs;
 		return submissionDocs[0].data();
 	} catch (error) {
+    console.log(error);
 		throw error;
 	}
 }
@@ -119,7 +120,6 @@ export const makeSubmission = async (uid: string, problem_id: string, code: stri
 			uid: uid,
 		})).id;
 		// Write code to tmp file
-		// TODO: test if this works
 		const tempPath = path.join(os.tmpdir(), submissionID);
 		fs.writeFileSync(tempPath, code);
 		// Upload file to storage
