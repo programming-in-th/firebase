@@ -113,6 +113,8 @@ export const getOldestSubmissionInQueue = async (problem_id: string) => {
 export const makeSubmission = async (uid: string, problem_id: string, code: string, language: string) => {
 	// NOTE: All undefined numerical values are default set to -1
 	try {
+		// Get username for user id
+		const username = (await admin.firestore().collection('users').doc(uid).get()).data()!.username;
 		// Create new submission entry in Firestore
 		const submissionID = (await admin.firestore().collection('submissions').add({
 			language: language,
@@ -123,6 +125,7 @@ export const makeSubmission = async (uid: string, problem_id: string, code: stri
 			time: -1,
 			timestamp: Timestamp.now(),
 			uid: uid,
+			username: username,
 		})).id;
 		// Write code to tmp file
 		const tempPath = path.join(os.tmpdir(), submissionID);
