@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 
 import { getTasksWithFilter } from './model/tasks';
-import { getRecentSubmissions, getSubmissionsWithFilter, getDetailedSubmissionData, getOldestUngradedSubmission, makeSubmission, updateSubmissionStatus } from './model/submissions';
+import { getRecentSubmissions, getSubmissionsWithFilter, getDetailedSubmissionData, getOldestSubmissionInQueue, makeSubmission, updateSubmissionStatus } from './model/submissions';
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -35,9 +35,9 @@ app.get('/getDetailedSubmissionData', async (request: any, response: any) => {
 	}
 });
 
-app.get('/getOldestUngradedSubmission', async (request: any, response: any) => {
+app.get('/getOldestSubmissionInQueue', async (request: any, response: any) => {
 	try {
-		const result = await getOldestUngradedSubmission(request.query.problem_id);
+		const result = await getOldestSubmissionInQueue(request.query.problem_id);
 		response.send(result);
 	} catch (error) {
 		response.status(500).send(error);
