@@ -92,11 +92,13 @@ export const getDetailedSubmissionData = async (submission_id: string) => {
 
 export const getOldestUngradedSubmission = async (problem_id: string) => {
 	try {
-		const queryRef = admin.firestore().collection('submissions')
+		let queryRef = admin.firestore().collection('submissions')
 			.orderBy('timestamp')
 			.limit(1)
-			.where('problem_id', '==', problem_id)
 			.where('status', '==', 'in_queue');
+		if(problem_id) {
+			queryRef = queryRef.where('problem_id', '==', problem_id);
+		}
 		const submissionDocs = (await queryRef.get()).docs;
 		return submissionDocs[0].data();
 	} catch (error) {
