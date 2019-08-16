@@ -38,6 +38,17 @@ export const getSubmissionsWithFilter = async (limit: number, uid: string, probl
 	return result;
 }
 
+export const getCode = async (submission_id: string) => {
+	const submissionDoc = await admin.firestore().doc("submissions/" + submission_id).get();
+	// Get code file from storage
+	const tempPath = path.join(os.tmpdir(), submissionDoc.id);
+	await admin.storage().bucket().file("submissions/" + submissionDoc.id).download({ destination: tempPath });
+	console.log("Downloaded code file for submission " + submissionDoc.id + " to " + tempPath);
+	// Read the file
+	const code:string = fs.readFileSync(tempPath, { encoding: "utf8" });
+	return code;
+}
+
 export const getDetailedSubmissionData = async (submission_id: string) => {
 	interface SubcaseVerdictPair {
 		subcase: number,

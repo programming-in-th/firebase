@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 
 import { getTasksWithFilter } from './model/tasks';
-import { getRecentSubmissions, getSubmissionsWithFilter, getDetailedSubmissionData, getOldestSubmissionInQueue, makeSubmission, updateSubmissionStatus } from './model/submissions';
+import { getRecentSubmissions, getSubmissionsWithFilter, getDetailedSubmissionData, getOldestSubmissionInQueue, makeSubmission, updateSubmissionStatus, getCode } from './model/submissions';
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -20,6 +20,15 @@ app.get('/getRecentSubmissions', async (request: any, response: any) => {
 app.get('/getSubmissionsWithFilter', async (request: any, response: any) => {
 	try {
 		const result = await getSubmissionsWithFilter(parseInt(request.query.limit), request.query.uid, request.query.problem_id);
+		response.send(result);
+	} catch (error) {
+		response.status(500).send(error);
+	}
+});
+
+app.get('/getCode', async (request: any, response: any) => {
+	try {
+		const result = await getCode(request.query.submission_id);
 		response.send(result);
 	} catch (error) {
 		response.status(500).send(error);
