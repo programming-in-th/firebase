@@ -21,7 +21,7 @@ export const getRecentSubmissions = functions.region('asia-east2').https.onCall(
 		});
 		return submissions;
 	} catch (error) {
-		throw new functions.https.HttpsError('unknown', 'Query Failed');
+		throw new functions.https.HttpsError('unknown', error);
 	}
 })
 
@@ -55,7 +55,7 @@ export const getSubmissionsWithFilter = functions.region('asia-east2').https.onC
 		});
 		return result;
 	} catch (error) {
-		throw new functions.https.HttpsError('unknown', 'Query Failed');
+		throw new functions.https.HttpsError('unknown', error);
 	}
 })
 
@@ -74,7 +74,7 @@ export const getCode = functions.region('asia-east2').https.onCall(async (reques
 		const code: string = fs.readFileSync(tempPath, { encoding: "utf8" });
 		return code;
 	} catch (error) {
-		throw new functions.https.HttpsError('unknown', 'Query Failed');
+		throw new functions.https.HttpsError('unknown', error);
 	}
 })
 
@@ -117,7 +117,7 @@ export const getDetailedSubmissionData = functions.region('asia-east2').https.on
 		const result = { metadata: metadata, code: code, case_results: caseResults };
 		return result;
 	} catch (error) {
-		throw new functions.https.HttpsError('unknown', 'Query Failed');
+		throw new functions.https.HttpsError('unknown', error);
 	}
 	/*
 	Returns data as
@@ -158,7 +158,7 @@ export const getOldestSubmissionInQueue = functions.region('asia-east2').https.o
 			return {};
 		}
 	} catch (error) {
-		throw new functions.https.HttpsError('unknown', 'Query failed');
+		throw new functions.https.HttpsError('unknown', error);
 	}
 })
 
@@ -207,7 +207,7 @@ export const makeSubmission = functions.region('asia-east2').https.onCall(async 
 			destination: 'submissions/' + submissionID,
 		});
 	} catch (error) {
-		throw new functions.https.HttpsError('unknown', 'Query failed');
+		throw new functions.https.HttpsError('unknown', error);
 	}
 })
 
@@ -241,6 +241,6 @@ export const updateSubmissionStatus = functions.region('asia-east2').https.onCal
 			memory: memory
 		});
 	} catch (error) {
-		throw new functions.https.HttpsError('unknown', 'Query failed');
+		throw new functions.https.HttpsError('unknown', error);
 	}
 })

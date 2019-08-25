@@ -6,14 +6,27 @@ export const getTasksWithFilter = functions.region('asia-east2').https.onCall(as
 	const min_difficulty = request_data.min_difficulty;
 	const max_difficulty = request_data.max_difficulty;
 	const tags = request_data.tags;
+	if (!(typeof limit === 'number') || limit <= 0) {
+		throw new functions.https.HttpsError('invalid-argument', 'Limit must be a number > 0');
+	}
+	if (!(typeof min_difficulty === 'number') || min_difficulty < 0) {
+		throw new functions.https.HttpsError('invalid-argument', 'Min difficulty must be a number >= 0');
+	}
+	if (!(typeof max_difficulty === 'number') || max_difficulty < min_difficulty) {
+		throw new functions.https.HttpsError('invalid-argument', 'Max difficulty must be a number >= Min difficulty');
+	}
+	if (!(tags instanceof Array)) {
+		throw new functions.https.HttpsError('invalid-argument', 'Tags must be a string[]');
+	}
+	console.log(limit);
+	console.log(min_difficulty);
+	console.log(max_difficulty);
+	console.log(tags);
 	try {
-		let taskDocRefs = admin.firestore().collection("tasks").orderBy("difficulty").limit(limit);
-		if (min_difficulty) {
-			taskDocRefs = taskDocRefs.where("difficulty", ">=", min_difficulty);
-		}
-		if (max_difficulty) {
-			taskDocRefs = taskDocRefs.where("difficulty", "<=", max_difficulty);
-		}
+		const taskDocRefs = admin.firestore().collection("tasks").orderBy("difficulty")
+						.limit(limit)
+						.where("difficulty", ">=", min_difficulty)
+						.where("difficulty", "<=", max_difficulty);
 		const taskDocs = await taskDocRefs.get();
 		const result: Object[] = [];
 		taskDocs.docs.forEach((doc) => {
@@ -30,6 +43,6 @@ export const getTasksWithFilter = functions.region('asia-east2').https.onCall(as
 		});
 		return result;
 	} catch (error) {
-		throw new functions.https.HttpsError('unknown', 'Query Failed');
+		throw new functions.https.HttpsError('unknown', error);
 	}
 });
