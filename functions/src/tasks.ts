@@ -18,10 +18,6 @@ export const getTasksWithFilter = functions.region('asia-east2').https.onCall(as
 	if (!(tags instanceof Array)) {
 		throw new functions.https.HttpsError('invalid-argument', 'Tags must be a string[]');
 	}
-	console.log(limit);
-	console.log(min_difficulty);
-	console.log(max_difficulty);
-	console.log(tags);
 	try {
 		const taskDocRefs = admin.firestore().collection("tasks").orderBy("difficulty")
 						.limit(limit)
