@@ -1,11 +1,12 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as os from 'os';
 import { Timestamp } from '@google-cloud/firestore';
+import { readCode, writeCode } from './util';
 
 export const getRecentSubmissions = functions.region('asia-east2').https.onCall(async (request_data: any, context: functions.https.CallableContext) => {
+	/*
+	Arguments: limit: number
+	*/
 	const limit = request_data.limit;
 	if (!(typeof limit === 'number') || limit <= 0) {
 		throw new functions.https.HttpsError('invalid-argument', 'Limit must be a number > 0');
@@ -26,6 +27,9 @@ export const getRecentSubmissions = functions.region('asia-east2').https.onCall(
 })
 
 export const getSubmissionsWithFilter = functions.region('asia-east2').https.onCall(async (request_data: any, context: functions.https.CallableContext) => {
+	/*
+	Arguments: limit: number, uid: string, problem_id: string
+	*/
 	const limit = request_data.limit;
 	const uid = request_data.uid;
 	const problem_id = request_data.problem_id;
@@ -59,26 +63,10 @@ export const getSubmissionsWithFilter = functions.region('asia-east2').https.onC
 	}
 })
 
-export const getCode = functions.region('asia-east2').https.onCall(async (request_data: any, context: functions.https.CallableContext) => {
-	const submission_id = request_data.submission_id;
-	if (!(typeof submission_id === 'string') || submission_id.length === 0) {
-		throw new functions.https.HttpsError('invalid-argument', 'Submission ID must be a non-empty string');
-	}
-	try {
-		const submissionDoc = await admin.firestore().doc("submissions/" + submission_id).get();
-		// Get code file from storage
-		const tempPath = path.join(os.tmpdir(), submissionDoc.id);
-		await admin.storage().bucket().file("submissions/" + submissionDoc.id).download({ destination: tempPath });
-		console.log("Downloaded code file for submission " + submissionDoc.id + " to " + tempPath);
-		// Read the file
-		const code: string = fs.readFileSync(tempPath, { encoding: "utf8" });
-		return code;
-	} catch (error) {
-		throw new functions.https.HttpsError('unknown', error);
-	}
-})
-
 export const getDetailedSubmissionData = functions.region('asia-east2').https.onCall(async (request_data: any, context: functions.https.CallableContext) => {
+	/*
+	Arguments: submission_id: string
+	*/
 	interface SubcaseVerdictPair {
 		subcase: number,
 		verdict: string
@@ -109,11 +97,7 @@ export const getDetailedSubmissionData = functions.region('asia-east2').https.on
 			});
 		}
 		// Get code file from storage
-		const tempPath = path.join(os.tmpdir(), submissionDoc.id);
-		await admin.storage().bucket().file("submissions/" + submissionDoc.id).download({ destination: tempPath });
-		console.log("Downloaded code file for submission " + submissionDoc.id + " to " + tempPath);
-		// Read the file
-		const code: string = fs.readFileSync(tempPath, { encoding: "utf8" });
+		const code = await readCode(submissionDoc.id);
 		const result = { metadata: metadata, code: code, case_results: caseResults };
 		return result;
 	} catch (error) {
@@ -138,31 +122,44 @@ export const getDetailedSubmissionData = functions.region('asia-east2').https.on
 	*/
 })
 
-export const getOldestSubmissionInQueue = functions.region('asia-east2').https.onCall(async (request_data: any, context: functions.https.CallableContext) => {
+export const getOldestSubmissionsInQueue = functions.region('asia-east2').https.onCall(async (request_data: any, context: functions.https.CallableContext) => {
+	/*
+	Arguments: problem_id?: string, limit: number
+	*/
 	const problem_id = request_data.problem_id;
-	if (!(typeof problem_id === 'string') || problem_id.length === 0) {
-		throw new functions.https.HttpsError('invalid-argument', 'Problem ID must be a non-empty string');
+	const limit = request_data.limit;
+	if(!(typeof limit === 'number') || limit <= 0) {
+		throw new functions.https.HttpsError('invalid-argument', 'Limit must be a number > 0');
 	}
 	try {
 		let queryRef = admin.firestore().collection('submissions')
 			.orderBy('timestamp')
-			.limit(1)
+			.limit(limit)
 			.where('status', '==', 'in_queue');
 		if (problem_id) {
 			queryRef = queryRef.where('problem_id', '==', problem_id);
 		}
 		const submissionDocs = (await queryRef.get()).docs;
-		if (submissionDocs.length !== 0) {
-			return submissionDocs[0].data();
-		} else {
-			return {};
+		const result:any[] = [];
+		for(const doc of submissionDocs) {
+			const code = await readCode(doc.id);
+			const data = {
+				...doc.data(),
+				submission_id: doc.id,
+				code: code,
+			};
+			result.push(data);
 		}
+		return result;
 	} catch (error) {
 		throw new functions.https.HttpsError('unknown', error);
 	}
 })
 
 export const makeSubmission = functions.region('asia-east2').https.onCall(async (request_data: any, context: functions.https.CallableContext) => {
+	/*
+	Arguments: uid: string, problem_id: string, code: string, language: string
+	*/
 	const uid = request_data.uid;
 	const problem_id = request_data.problem_id;
 	const code = request_data.code;
@@ -199,19 +196,16 @@ export const makeSubmission = functions.region('asia-east2').https.onCall(async 
 			username: username,
 		})).id;
 		// Write code to tmp file
-		const tempPath = path.join(os.tmpdir(), submissionID);
-		fs.writeFileSync(tempPath, code);
-		// Upload file to storage
-		const bucket = admin.storage().bucket();
-		await bucket.upload(tempPath, {
-			destination: 'submissions/' + submissionID,
-		});
+		await writeCode(submissionID, code);
 	} catch (error) {
 		throw new functions.https.HttpsError('unknown', error);
 	}
 })
 
 export const updateSubmissionStatus = functions.region('asia-east2').https.onCall(async (request_data: any, context: functions.https.CallableContext) => {
+	/*
+	Arguments: submission_id: string, status: string, points: number, time: number, memory: number
+	*/
 	const submission_id = request_data.submission_id;
 	const status = request_data.status;
 	const points = request_data.points;
@@ -231,6 +225,9 @@ export const updateSubmissionStatus = functions.region('asia-east2').https.onCal
 	}
 	if(!(typeof memory === 'number')) {
 		throw new functions.https.HttpsError('invalid-argument', 'Memory must be a number');
+	}
+	if(!context.auth) {
+		throw new functions.https.HttpsError('permission-denied', 'Unauthorized to update submission status');
 	}
 	try {
 		const submissionDocRef = admin.firestore().collection('submissions').doc(submission_id);
