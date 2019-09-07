@@ -197,6 +197,7 @@ export const makeSubmission = functions.region('asia-east2').https.onCall(async 
 		})).id;
 		// Write code to tmp file
 		await writeCode(submissionID, code);
+		return submissionID;
 	} catch (error) {
 		throw new functions.https.HttpsError('unknown', error);
 	}
