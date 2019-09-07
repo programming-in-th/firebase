@@ -182,7 +182,7 @@ export const makeSubmission = functions.region('asia-east2').https.onCall(async 
 	// NOTE: All undefined numerical values are default set to -1
 	try {
 		// Get username for user id
-		const username = (await admin.firestore().collection('users').doc(uid).get()).data()!.username;
+		const username = (await admin.auth().getUser(context.auth.uid)).displayName;
 		// Create new submission entry in Firestore
 		const submissionID = (await admin.firestore().collection('submissions').add({
 			language: language,
