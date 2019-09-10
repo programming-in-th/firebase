@@ -5,14 +5,21 @@ import { readCode, writeCode } from './util';
 
 export const getRecentSubmissions = functions.region('asia-east2').https.onCall(async (request_data: any, context: functions.https.CallableContext) => {
 	/*
-	Arguments: limit: number
+	Arguments: limit: number, last_document_id
 	*/
 	const limit = request_data.limit;
-	if (!(typeof limit === 'number') || limit <= 0) {
-		throw new functions.https.HttpsError('invalid-argument', 'Limit must be a number > 0');
-	}
+	const last_document_id = request_data.last_document_id;
 	try {
-		const submissionDocs = await admin.firestore().collection("submissions").orderBy("timestamp", "desc").limit(limit).get();
+		let query = admin.firestore().collection("submissions")
+								.orderBy("timestamp", "desc")
+		if(limit) {
+			query = query.limit(limit);
+		}
+		if(last_document_id) {
+			const last_document = await admin.firestore().collection("submissions").doc(last_document_id).get();
+			query = query.startAfter(last_document);
+		}
+		const submissionDocs = await query.get();
 		// Handles GET requests
 		const submissions: Object[] = [];
 		submissionDocs.docs.forEach((doc) => {
