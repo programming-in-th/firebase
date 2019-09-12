@@ -46,12 +46,12 @@ export const getTasksWithFilter = functions.region('asia-east2').https.onCall(as
 export const getProblemMetadata = functions.region('asia-east2').https.onCall(async (request_data: any, context: functions.https.CallableContext) => {
 	const problem_id = request_data.problem_id;
 	if (!(typeof problem_id === 'string')) {
-		throw new functions.https.HttpsError('invalid-argument', 'Task ID must be a string');
+		throw new functions.https.HttpsError('invalid-argument', 'problem ID must be a string, given problem ID = ' + problem_id);
 	}
 	try {
 		const taskSnapshot = await admin.firestore().collection('tasks').where("problem_id", "==", problem_id).get();
 		if(taskSnapshot.docs.length === 0) return {};
-		if(taskSnapshot.docs.length === 1) {
+		else if(taskSnapshot.docs.length === 1) {
 			return taskSnapshot.docs[0].data()!;
 		} else {
 			throw new Error('Duplicate snapshots found!!!');
