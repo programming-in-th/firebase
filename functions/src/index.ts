@@ -6,3 +6,4 @@ admin.initializeApp({
 
 export * from './submissions'
 export * from './tasks'
+export * from './learn'
