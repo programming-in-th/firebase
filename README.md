@@ -5,8 +5,11 @@ Contains all back-end code
 
 We will need to give you grader-ef0b5-c147bbe98312.json because it is not found in the repo
 
-To test with production database, run following command in terminal:
+To test with production database (running the functions server locally), run following command in terminal:
 ```export GOOGLE_APPLICATION_CREDENTIALS="[PATH_TO_THIS_REPO]/grader-ef0b5-c147bbe98312.json"```
 
-To start the server, run following command in terminal:
-```npm run build && firebase serve```
+To start the server, make sure you are in the "functions" directory found within the repo and run following command in terminal:
+```npm run-script build && npm run-script serve```
+
+To deploy, run in the "functions" directory:
+```npm run-script deploy```
