@@ -104,7 +104,12 @@ export const getDetailedSubmissionData = functions.region('asia-east2').https.on
 			});
 		}
 		// Get code file from storage
-		const code = await readCode(submissionDoc.id);
+		let code = ''
+		const user = (context.auth ? context.auth.uid : '')
+		const userMeta = (metadata ? metadata.uid : '')
+		if((metadata && !metadata.hideCode) || user === userMeta) {
+			code = await readCode(submissionDoc.id)
+		}
 		const result = { metadata: metadata, code: code, case_results: caseResults };
 		return result;
 	} catch (error) {
@@ -171,6 +176,7 @@ export const makeSubmission = functions.region('asia-east2').https.onCall(async 
 	const problem_id = request_data.problem_id;
 	const code = request_data.code;
 	const language = request_data.language;
+	const hideCode = request_data.hideSub;
 	if (!(typeof uid === 'string') || uid.length === 0) {
 		throw new functions.https.HttpsError('invalid-argument', 'UID must be a non-empty string');
 	}
@@ -185,6 +191,9 @@ export const makeSubmission = functions.region('asia-east2').https.onCall(async 
 	}
 	if (!context.auth || context.auth.uid !== uid) {
 		throw new functions.https.HttpsError('permission-denied', 'Unauthorized to make submission');
+	}
+	if(!(typeof hideCode === 'boolean')) {
+		throw new functions.https.HttpsError('invalid-argument', 'Hide Code must be boolean');
 	}
 	// NOTE: All undefined numerical values are default set to -1
 	try {
@@ -204,6 +213,7 @@ export const makeSubmission = functions.region('asia-east2').https.onCall(async 
 			timestamp: Timestamp.now(),
 			uid: uid,
 			username: username,
+			hideCode: hideCode
 		})).id;
 		// Write code to tmp file
 		await writeCode(submissionID, code);
