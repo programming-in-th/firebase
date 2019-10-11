@@ -176,7 +176,7 @@ export const makeSubmission = functions.region('asia-east2').https.onCall(async 
 	const problem_id = request_data.problem_id;
 	const code = request_data.code;
 	const language = request_data.language;
-	const hideCode = request_data.hideSub;
+	const hideCode = request_data.hideCode;
 	if (!(typeof uid === 'string') || uid.length === 0) {
 		throw new functions.https.HttpsError('invalid-argument', 'UID must be a non-empty string');
 	}
