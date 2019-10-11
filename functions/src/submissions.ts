@@ -11,11 +11,11 @@ export const getRecentSubmissions = functions.region('asia-east2').https.onCall(
 	const last_document_id = request_data.last_document_id;
 	try {
 		let query = admin.firestore().collection("submissions")
-								.orderBy("timestamp", "desc")
-		if(limit) {
+			.orderBy("timestamp", "desc")
+		if (limit) {
 			query = query.limit(limit);
 		}
-		if(last_document_id) {
+		if (last_document_id) {
 			const last_document = await admin.firestore().collection("submissions").doc(last_document_id).get();
 			query = query.startAfter(last_document);
 		}
@@ -135,7 +135,7 @@ export const getOldestSubmissionsInQueue = functions.region('asia-east2').https.
 	*/
 	const problem_id = request_data.problem_id;
 	const limit = request_data.limit;
-	if(!(typeof limit === 'number') || limit <= 0) {
+	if (!(typeof limit === 'number') || limit <= 0) {
 		throw new functions.https.HttpsError('invalid-argument', 'Limit must be a number > 0');
 	}
 	try {
@@ -147,8 +147,8 @@ export const getOldestSubmissionsInQueue = functions.region('asia-east2').https.
 			queryRef = queryRef.where('problem_id', '==', problem_id);
 		}
 		const submissionDocs = (await queryRef.get()).docs;
-		const result:any[] = [];
-		for(const doc of submissionDocs) {
+		const result: any[] = [];
+		for (const doc of submissionDocs) {
 			const code = await readCode(doc.id);
 			const data = {
 				...doc.data(),
@@ -171,30 +171,33 @@ export const makeSubmission = functions.region('asia-east2').https.onCall(async 
 	const problem_id = request_data.problem_id;
 	const code = request_data.code;
 	const language = request_data.language;
-	if(!(typeof uid === 'string') || uid.length === 0) {
+	if (!(typeof uid === 'string') || uid.length === 0) {
 		throw new functions.https.HttpsError('invalid-argument', 'UID must be a non-empty string');
 	}
-	if(!(typeof problem_id === 'string') || problem_id.length === 0) {
+	if (!(typeof problem_id === 'string') || problem_id.length === 0) {
 		throw new functions.https.HttpsError('invalid-argument', 'Problem ID must be a non-empty string');
 	}
-	if(!(typeof code === 'string') || code.length === 0) {
+	if (!(typeof code === 'string') || code.length === 0) {
 		throw new functions.https.HttpsError('invalid-argument', 'Code must be a non-empty string');
 	}
-	if(!(typeof language === 'string') || language.length === 0) {
+	if (!(typeof language === 'string') || language.length === 0) {
 		throw new functions.https.HttpsError('invalid-argument', 'Language must be a non-empty string');
 	}
-	if(!context.auth || context.auth.uid !== uid) {
+	if (!context.auth || context.auth.uid !== uid) {
 		throw new functions.https.HttpsError('permission-denied', 'Unauthorized to make submission');
 	}
 	// NOTE: All undefined numerical values are default set to -1
 	try {
 		// Get username for user id
 		const username = (await admin.auth().getUser(context.auth.uid)).displayName;
+		const problem_snapshot = (await admin.firestore().collection('tasks').where('problem_id', '==', problem_id).get()).docs[0];;
+		const problem_name = problem_snapshot.data().title;
 		// Create new submission entry in Firestore
 		const submissionID = (await admin.firestore().collection('submissions').add({
 			language: language,
 			memory: -1,
 			points: -1,
+			problem_name: problem_name,
 			problem_id: problem_id,
 			status: "in_queue",
 			time: -1,
@@ -219,22 +222,22 @@ export const updateSubmissionStatus = functions.region('asia-east2').https.onCal
 	const points = request_data.points;
 	const time = request_data.time;
 	const memory = request_data.memory;
-	if(!(typeof submission_id === 'string') || submission_id.length === 0) {
+	if (!(typeof submission_id === 'string') || submission_id.length === 0) {
 		throw new functions.https.HttpsError('invalid-argument', 'Submission ID must be a non-empty string');
 	}
-	if(!(typeof status === 'string') || status.length === 0) {
+	if (!(typeof status === 'string') || status.length === 0) {
 		throw new functions.https.HttpsError('invalid-argument', 'Status must be a non-empty string');
 	}
-	if(!(typeof points === 'number')) {
+	if (!(typeof points === 'number')) {
 		throw new functions.https.HttpsError('invalid-argument', 'Points must be a number');
 	}
-	if(!(typeof time === 'number')) {
+	if (!(typeof time === 'number')) {
 		throw new functions.https.HttpsError('invalid-argument', 'Time must be a number');
 	}
-	if(!(typeof memory === 'number')) {
+	if (!(typeof memory === 'number')) {
 		throw new functions.https.HttpsError('invalid-argument', 'Memory must be a number');
 	}
-	if(!context.auth) {
+	if (!context.auth) {
 		throw new functions.https.HttpsError('permission-denied', 'Unauthorized to update submission status');
 	}
 	try {
