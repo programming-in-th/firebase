@@ -327,70 +327,70 @@ export const makeSubmission = functions
         }
     );
 
-export const updateSubmissionStatus = functions
-    .region("asia-east2")
-    .https.onCall(
-        async (request_data: any, context: functions.https.CallableContext) => {
-            /*
-  Arguments: submission_id: string, status: string, points: number, time: number, memory: number
-  */
-            const submission_id = request_data.submission_id;
-            const status = request_data.status;
-            const points = request_data.points;
-            const time = request_data.time;
-            const memory = request_data.memory;
-            if (
-                !(typeof submission_id === "string") ||
-                submission_id.length === 0
-            ) {
-                throw new functions.https.HttpsError(
-                    "invalid-argument",
-                    "Submission ID must be a non-empty string"
-                );
-            }
-            if (!(typeof status === "string") || status.length === 0) {
-                throw new functions.https.HttpsError(
-                    "invalid-argument",
-                    "Status must be a non-empty string"
-                );
-            }
-            if (!(typeof points === "number")) {
-                throw new functions.https.HttpsError(
-                    "invalid-argument",
-                    "Points must be a number"
-                );
-            }
-            if (!(typeof time === "number")) {
-                throw new functions.https.HttpsError(
-                    "invalid-argument",
-                    "Time must be a number"
-                );
-            }
-            if (!(typeof memory === "number")) {
-                throw new functions.https.HttpsError(
-                    "invalid-argument",
-                    "Memory must be a number"
-                );
-            }
-            if (!context.auth) {
-                throw new functions.https.HttpsError(
-                    "permission-denied",
-                    "Unauthorized to update submission status"
-                );
-            }
-            try {
-                const submissionDocRef = admin
-                    .firestore()
-                    .collection("submissions")
-                    .doc(submission_id);
-                await submissionDocRef.update({
-                    points: points,
-                    status: status,
-                    time: time,
-                    memory: memory
-                });
-            } catch (error) {
-                throw new functions.https.HttpsError("unknown", error);
-            }
-        }
-    );
+// export const updateSubmissionStatus = functions
+//     .region("asia-east2")
+//     .https.onCall(
+//         async (request_data: any, context: functions.https.CallableContext) => {
+//             /*
+//   Arguments: submission_id: string, status: string, points: number, time: number, memory: number
+//   */
+//             const submission_id = request_data.submission_id;
+//             const status = request_data.status;
+//             const points = request_data.points;
+//             const time = request_data.time;
+//             const memory = request_data.memory;
+//             if (
+//                 !(typeof submission_id === "string") ||
+//                 submission_id.length === 0
+//             ) {
+//                 throw new functions.https.HttpsError(
+//                     "invalid-argument",
+//                     "Submission ID must be a non-empty string"
+//                 );
+//             }
+//             if (!(typeof status === "string") || status.length === 0) {
+//                 throw new functions.https.HttpsError(
+//                     "invalid-argument",
+//                     "Status must be a non-empty string"
+//                 );
+//             }
+//             if (!(typeof points === "number")) {
+//                 throw new functions.https.HttpsError(
+//                     "invalid-argument",
+//                     "Points must be a number"
+//                 );
+//             }
+//             if (!(typeof time === "number")) {
+//                 throw new functions.https.HttpsError(
+//                     "invalid-argument",
+//                     "Time must be a number"
+//                 );
+//             }
+//             if (!(typeof memory === "number")) {
+//                 throw new functions.https.HttpsError(
+//                     "invalid-argument",
+//                     "Memory must be a number"
+//                 );
+//             }
+//             if (!context.auth) {
+//                 throw new functions.https.HttpsError(
+//                     "permission-denied",
+//                     "Unauthorized to update submission status"
+//                 );
+//             }
+//             try {
+//                 const submissionDocRef = admin
+//                     .firestore()
+//                     .collection("submissions")
+//                     .doc(submission_id);
+//                 await submissionDocRef.update({
+//                     points: points,
+//                     status: status,
+//                     time: time,
+//                     memory: memory
+//                 });
+//             } catch (error) {
+//                 throw new functions.https.HttpsError("unknown", error);
+//             }
+//         }
+//     );
