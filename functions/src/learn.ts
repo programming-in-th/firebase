@@ -60,3 +60,37 @@ export const getLearnMenu = functions
             }
         }
     );
+
+export const getArticleByID = functions
+    .region("asia-east2")
+    .https.onCall(
+        async (request_data: any, context: functions.https.CallableContext) => {
+            try {
+                const article_id = request_data.article_id as string;
+                const splitted = article_id.split('`');
+                if (splitted.length === 2) {
+                    const section_id = splitted[0];
+                    const section_doc = await admin
+                        .firestore()
+                        .collection("tutorials")
+                        .where("section_id", "==", section_id)
+                        .get();
+                    console.log(section_doc.docs[0].data());
+                    const article_doc = await section_doc.docs[0].ref
+                        .collection("articles")
+                        .where("article_id", "==", article_id)
+                        .get();
+                    return article_doc.docs[0].data();
+                } else {
+                    const article_doc = await admin
+                        .firestore()
+                        .collection("tutorials")
+                        .where("article_id", "==", article_id)
+                        .get();
+                    return article_doc.docs[0].data();
+                }
+            } catch (error) {
+                throw new functions.https.HttpsError("unknown", error);
+            }
+        }
+    );
