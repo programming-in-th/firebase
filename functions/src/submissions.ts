@@ -34,6 +34,13 @@ export const getRecentSubmissions = functions
         submissionDocs.docs.forEach(doc => {
           const data = doc.data()
           data.submission_id = doc.id
+          const firebaseDate = new admin.firestore.Timestamp(
+            data.time._seconds,
+            data.time._nanoseconds
+          )
+
+          const jsDate = firebaseDate.toDate()
+          data.humanTimestamp = jsDate.toLocaleString()
           submissions.push(data)
         })
         return submissions
