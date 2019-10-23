@@ -67,7 +67,7 @@ export const getArticleByID = functions
         async (request_data: any, context: functions.https.CallableContext) => {
             try {
                 const article_id = request_data.article_id as string;
-                const splitted = article_id.split('`');
+                const splitted = article_id.split("-");
                 if (splitted.length === 2) {
                     const section_id = splitted[0];
                     const section_doc = await admin
