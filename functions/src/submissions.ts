@@ -35,8 +35,8 @@ export const getRecentSubmissions = functions
           const data = doc.data()
           data.submission_id = doc.id
           const firebaseDate = new admin.firestore.Timestamp(
-            data.time._seconds,
-            data.time._nanoseconds
+            data.timestamp._seconds,
+            data.timestamp._nanoseconds
           )
 
           const jsDate = firebaseDate.toDate()
@@ -100,8 +100,8 @@ export const getSubmissionsWithFilter = functions
           const data = doc.data()
           data.submission_id = doc.id
           const firebaseDate = new admin.firestore.Timestamp(
-            data.time._seconds,
-            data.time._nanoseconds
+            data.timestamp._seconds,
+            data.timestamp._nanoseconds
           )
 
           const jsDate = firebaseDate.toDate()
