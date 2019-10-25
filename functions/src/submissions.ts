@@ -1,6 +1,5 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
-import { Timestamp } from '@google-cloud/firestore'
 import { readCode, writeCode } from './util'
 
 export const getRecentSubmissions = functions
@@ -320,7 +319,7 @@ export const makeSubmission = functions
             problem_id: problem_id,
             status: 'in_queue',
             time: -1,
-            timestamp: Timestamp.now(),
+            timestamp: admin.firestore.Timestamp.now(),
             uid: uid,
             username: username,
             hideCode: hideCode
