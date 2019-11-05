@@ -57,3 +57,20 @@ export const getAllUser = functions
 			}
 		}
 	);
+
+export const updateAdmin = functions
+	.region("asia-east2")
+	.https.onCall(
+		async (request_data: any, context: functions.https.CallableContext) => {
+			const isAdmin = await checkAdmin(context);
+			if (!isAdmin) return false;
+			const uid = request_data.uid;
+			const checked = request_data.checked;
+			await admin
+				.firestore()
+				.collection("users")
+				.doc(uid)
+				.update({ admin: checked });
+			return true;
+		}
+	);
