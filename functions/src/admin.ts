@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
-const checkAdmin = async (context: functions.https.CallableContext) => {
+export const checkAdmin = async (context: functions.https.CallableContext) => {
 	if (!context.auth) return false;
 	const uid = context.auth ? context.auth.uid : "";
 	if (!(typeof uid === "string")) {

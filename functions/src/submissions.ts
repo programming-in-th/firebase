@@ -1,6 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { readCode, writeCode } from "./util";
+import { checkAdmin } from "./admin";
 
 export const getRecentSubmissions = functions
 	.region("asia-east2")
@@ -54,74 +55,74 @@ export const getRecentSubmissions = functions
 		}
 	});
 
-export const getSubmissionsWithFilter = functions
-	.region("asia-east2")
-	.https.onCall(
-		async (request_data: any, context: functions.https.CallableContext) => {
-			/*
-  Arguments: limit: number, uid: string, problem_id: string
-  */
-			const limit = request_data.limit;
-			const uid = request_data.uid;
-			const problem_id = request_data.problem_id;
-			if (!(typeof limit === "number") || limit <= 0) {
-				throw new functions.https.HttpsError(
-					"invalid-argument",
-					"Limit must be a number > 0"
-				);
-			}
-			if (!(typeof uid === "string")) {
-				throw new functions.https.HttpsError(
-					"invalid-argument",
-					"UID must be a string"
-				);
-			}
-			if (!(typeof problem_id === "string")) {
-				throw new functions.https.HttpsError(
-					"invalid-argument",
-					"Problem ID must be a string"
-				);
-			}
-			try {
-				let submissionDocRefs = admin
-					.firestore()
-					.collection("submissions")
-					.orderBy("timestamp", "desc")
-					.limit(limit);
-				if (uid) {
-					submissionDocRefs = submissionDocRefs.where(
-						"uid",
-						"==",
-						uid
-					);
-				}
-				if (problem_id) {
-					submissionDocRefs = submissionDocRefs.where(
-						"problem_id",
-						"==",
-						problem_id
-					);
-				}
-				const submissionDocs = await submissionDocRefs.get();
-				const result: Object[] = [];
-				submissionDocs.docs.forEach(doc => {
-					const data = doc.data();
-					data.submission_id = doc.id;
-					const firebaseDate = new admin.firestore.Timestamp(
-						data.timestamp._seconds,
-						data.timestamp._nanoseconds
-					);
+// export const getSubmissionsWithFilter = functions
+// 	.region("asia-east2")
+// 	.https.onCall(
+// 		async (request_data: any, context: functions.https.CallableContext) => {
+// 			/*
+//   Arguments: limit: number, uid: string, problem_id: string
+//   */
+// 			const limit = request_data.limit;
+// 			const uid = request_data.uid;
+// 			const problem_id = request_data.problem_id;
+// 			if (!(typeof limit === "number") || limit <= 0) {
+// 				throw new functions.https.HttpsError(
+// 					"invalid-argument",
+// 					"Limit must be a number > 0"
+// 				);
+// 			}
+// 			if (!(typeof uid === "string")) {
+// 				throw new functions.https.HttpsError(
+// 					"invalid-argument",
+// 					"UID must be a string"
+// 				);
+// 			}
+// 			if (!(typeof problem_id === "string")) {
+// 				throw new functions.https.HttpsError(
+// 					"invalid-argument",
+// 					"Problem ID must be a string"
+// 				);
+// 			}
+// 			try {
+// 				let submissionDocRefs = admin
+// 					.firestore()
+// 					.collection("submissions")
+// 					.orderBy("timestamp", "desc")
+// 					.limit(limit);
+// 				if (uid) {
+// 					submissionDocRefs = submissionDocRefs.where(
+// 						"uid",
+// 						"==",
+// 						uid
+// 					);
+// 				}
+// 				if (problem_id) {
+// 					submissionDocRefs = submissionDocRefs.where(
+// 						"problem_id",
+// 						"==",
+// 						problem_id
+// 					);
+// 				}
+// 				const submissionDocs = await submissionDocRefs.get();
+// 				const result: Object[] = [];
+// 				submissionDocs.docs.forEach(doc => {
+// 					const data = doc.data();
+// 					data.submission_id = doc.id;
+// 					const firebaseDate = new admin.firestore.Timestamp(
+// 						data.timestamp._seconds,
+// 						data.timestamp._nanoseconds
+// 					);
 
-					const jsDate = firebaseDate.toDate();
-					data.humanTimestamp = jsDate.toLocaleString();
-					result.push(data);
-				});
-				return result;
-			} catch (error) {
-				throw new functions.https.HttpsError("unknown", error);
-			}
-		}
-	);
+// 					const jsDate = firebaseDate.toDate();
+// 					data.humanTimestamp = jsDate.toLocaleString();
+// 					result.push(data);
+// 				});
+// 				return result;
+// 			} catch (error) {
+// 				throw new functions.https.HttpsError("unknown", error);
+// 			}
+// 		}
+// 	);
 
 export const getDetailedSubmissionData = functions
 	.region("asia-east2")
@@ -185,6 +186,7 @@ export const getDetailedSubmissionData = functions
 				let code = "";
 				const user = context.auth ? context.auth.uid : "";
 				const userMeta = metadata ? metadata.uid : "";
+				if (checkAdmin(context)) (metadata as any).hideCode = false;
 				if ((metadata && !metadata.hideCode) || user === userMeta) {
 					code = await readCode(submissionDoc.id);
 				}
