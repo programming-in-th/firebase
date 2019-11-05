@@ -4,6 +4,7 @@ import * as admin from "firebase-admin";
 export const getTasksWithFilter = functions
 	.region("asia-east2")
 	.https.onRequest(async (req, res) => {
+		res.set("Access-Control-Allow-Origin", "*");
 		const limit = req.query.limit;
 		const min_difficulty = req.query.min_difficulty;
 		const max_difficulty = req.query.max_difficulty;
@@ -72,6 +73,7 @@ export const getTasksWithFilter = functions
 export const getProblemMetadata = functions
 	.region("asia-east2")
 	.https.onRequest(async (req, res) => {
+		res.set("Access-Control-Allow-Origin", "*");
 		const problem_id = req.query.id;
 
 		if (!(typeof problem_id === "string")) {
