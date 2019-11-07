@@ -198,6 +198,48 @@ export const addTask = functions
 	.region("asia-east2")
 	.https.onCall(
 		async (request_data: any, context: functions.https.CallableContext) => {
+			if (!(typeof request_data.dfficulty === "number")) {
+				throw new functions.https.HttpsError(
+					"invalid-argument",
+					"difficulty must be number"
+				);
+			}
+			if (!(typeof request_data.memory_limit === "number")) {
+				throw new functions.https.HttpsError(
+					"invalid-argument",
+					"memory limit must be number"
+				);
+			}
+			if (!(typeof request_data.time_limit === "number")) {
+				throw new functions.https.HttpsError(
+					"invalid-argument",
+					"time limit must be number"
+				);
+			}
+			if (!(typeof request_data.problem_id === "string")) {
+				throw new functions.https.HttpsError(
+					"invalid-argument",
+					"problem id must be string"
+				);
+			}
+			if (!(typeof request_data.source === "string")) {
+				throw new functions.https.HttpsError(
+					"invalid-argument",
+					"source must be string"
+				);
+			}
+			if (!(typeof request_data.title === "string")) {
+				throw new functions.https.HttpsError(
+					"invalid-argument",
+					"title must be string"
+				);
+			}
+			if (!(typeof request_data.url === "string")) {
+				throw new functions.https.HttpsError(
+					"invalid-argument",
+					"url must be string"
+				);
+			}
 			const isAdmin = await checkAdmin(context);
 			if (!isAdmin) return false;
 			request_data.solve_count = 0;
