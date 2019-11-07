@@ -7,8 +7,10 @@ export const getAllTasks = functions
 		res.set("Access-Control-Allow-Origin", "*");
 
 		try {
-			const taskDocRefs = admin.firestore().collection("tasks");
-
+			const taskDocRefs = admin
+				.firestore()
+				.collection("tasks")
+				.where("visible", "==", true);
 			const taskDocs = await taskDocRefs.get();
 			const result: Object[] = [];
 			taskDocs.docs.forEach(doc => {

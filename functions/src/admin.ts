@@ -42,7 +42,7 @@ export const getAllUser = functions
 				const userDoc = await userSnapShot.get();
 				const userListRaw = await admin.auth().listUsers();
 				const userList: Object[] = [];
-				let map = new Map();
+				const map = new Map();
 				userDoc.docs.forEach(val => {
 					map.set(val.data().uid, val.data().admin);
 				});
@@ -72,5 +72,141 @@ export const updateAdmin = functions
 				.doc(uid)
 				.update({ admin: checked });
 			return true;
+		}
+	);
+
+// only onCall This functioin
+
+export const getAdminTask = functions
+	.region("asia-east2")
+	.https.onCall(
+		async (request_data: any, context: functions.https.CallableContext) => {
+			const isAdmin = await checkAdmin(context);
+			if (!isAdmin) return;
+			const taskRef = admin.firestore().collection("tasks");
+			const allTask = await taskRef.get();
+			const ret: Object[] = [];
+			allTask.docs.forEach(val => {
+				ret.push(val.data());
+			});
+			return ret;
+		}
+	);
+
+// taskList : {uid: string, visible: boolean} => array of object[]
+
+export const editTaskView = functions
+	.region("asia-east2")
+	.https.onCall(
+		async (request_data: any, context: functions.https.CallableContext) => {
+			const isAdmin = await checkAdmin(context);
+			if (!isAdmin) return;
+			request_data.forEach((element: any) => {
+				if (!(typeof element.uid === "string")) {
+					throw new functions.https.HttpsError(
+						"invalid-argument",
+						"uid must be string"
+					);
+				}
+				if (!(typeof element.visible === "boolean")) {
+					throw new functions.https.HttpsError(
+						"invalid-argument",
+						"visible must be boolean"
+					);
+				}
+			});
+			request_data.forEach(async (element: any) => {
+				await admin
+					.firestore()
+					.collection("tasks")
+					.doc(element.uid)
+					.update({ visible: element.visible });
+			});
+		}
+	);
+
+// {{uid: string, visible: boolean}} => array of object
+
+export const editTaskSubmit = functions
+	.region("asia-east2")
+	.https.onCall(
+		async (request_data: any, context: functions.https.CallableContext) => {
+			const isAdmin = await checkAdmin(context);
+			if (!isAdmin) return;
+			request_data.forEach((element: any) => {
+				if (!(typeof element.uid === "string")) {
+					throw new functions.https.HttpsError(
+						"invalid-argument",
+						"uid must be string"
+					);
+				}
+				if (!(typeof element.visible === "boolean")) {
+					throw new functions.https.HttpsError(
+						"invalid-argument",
+						"visible must be boolean"
+					);
+				}
+			});
+			request_data.forEach(async (element: any) => {
+				await admin
+					.firestore()
+					.collection("tasks")
+					.doc(element.uid)
+					.update({ submit: element.visible });
+			});
+		}
+	);
+
+// {string} => array of uid
+
+export const deleteTask = functions
+	.region("asia-east2")
+	.https.onCall(
+		async (request_data: any, context: functions.https.CallableContext) => {
+			const isAdmin = await checkAdmin(context);
+			if (!isAdmin) return;
+			request_data.forEach((element: any) => {
+				if (!(typeof element === "string")) {
+					throw new functions.https.HttpsError(
+						"invalid-argument",
+						"uid must be string"
+					);
+				}
+			});
+			request_data.forEach(async (element: any) => {
+				await admin
+					.firestore()
+					.collection("tasks")
+					.doc(element)
+					.delete();
+			});
+		}
+	);
+
+// obj of task  => only one task
+// {
+// 	dfficulty: number,
+// 	memory_limit: number,
+// 	problem_id: string,
+// 	source: string,
+// 	tag: Array<string>,
+// 	time_limit: number,
+// 	title: string,
+// 	url: string
+// }
+export const addTask = functions
+	.region("asia-east2")
+	.https.onCall(
+		async (request_data: any, context: functions.https.CallableContext) => {
+			const isAdmin = await checkAdmin(context);
+			if (!isAdmin) return false;
+			request_data.solve_count = 0;
+			request_data.visible = false;
+			request_data.submit = false;
+			const uid = await admin
+				.firestore()
+				.collection("tasks")
+				.add(request_data);
+			return uid;
 		}
 	);
