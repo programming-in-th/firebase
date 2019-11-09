@@ -55,6 +55,54 @@ export const getRecentSubmissions = functions
 		}
 	});
 
+	export const legacyGetRecentSubmissions = functions
+	.region('asia-east2')
+	.https.onCall(
+	  async (request_data: any, context: functions.https.CallableContext) => {
+		/*
+	Arguments: limit: number, last_document_id
+	*/
+		const limit = request_data.limit
+		const last_document_id = request_data.last_document_id
+		try {
+		  let query = admin
+			.firestore()
+			.collection('submissions')
+			.orderBy('timestamp', 'desc')
+		  if (limit) {
+			query = query.limit(limit)
+		  }
+		  if (last_document_id) {
+			const last_document = await admin
+			  .firestore()
+			  .collection('submissions')
+			  .doc(last_document_id)
+			  .get()
+			query = query.startAfter(last_document)
+		  }
+		  const submissionDocs = await query.get()
+		  // Handles GET requests
+		  const submissions: Object[] = []
+		  submissionDocs.docs.forEach(doc => {
+			const data = doc.data()
+			data.submission_id = doc.id
+			const firebaseDate = new admin.firestore.Timestamp(
+			  data.timestamp._seconds,
+			  data.timestamp._nanoseconds
+			)
+  
+			const jsDate = firebaseDate.toDate()
+			data.humanTimestamp = jsDate.toLocaleString()
+			submissions.push(data)
+		  })
+		  return submissions
+		} catch (error) {
+		  throw new functions.https.HttpsError('unknown', error)
+		}
+	  }
+	)
+  
+
 export const getSubmissionsWithFilter = functions
 	.region("asia-east2")
 	.https.onCall(
