@@ -82,12 +82,17 @@ export const getAdminTask = functions
 	.https.onCall(
 		async (request_data: any, context: functions.https.CallableContext) => {
 			const isAdmin = await checkAdmin(context);
-			if (!isAdmin) return;
-			const taskRef = admin.firestore().collection("tasks");
+			if (!isAdmin) return false;
+			const taskRef = admin
+				.firestore()
+				.collection("tasks")
+				.orderBy("problem_id");
 			const allTask = await taskRef.get();
 			const ret: Object[] = [];
 			allTask.docs.forEach(val => {
-				ret.push(val.data());
+				const data = val.data();
+				data.uid = val.id;
+				ret.push(data);
 			});
 			return ret;
 		}
@@ -100,7 +105,7 @@ export const editTaskView = functions
 	.https.onCall(
 		async (request_data: any, context: functions.https.CallableContext) => {
 			const isAdmin = await checkAdmin(context);
-			if (!isAdmin) return;
+			if (!isAdmin) return false;
 			request_data.forEach((element: any) => {
 				if (!(typeof element.uid === "string")) {
 					throw new functions.https.HttpsError(
@@ -122,6 +127,7 @@ export const editTaskView = functions
 					.doc(element.uid)
 					.update({ visible: element.visible });
 			});
+			return true;
 		}
 	);
 
@@ -132,7 +138,7 @@ export const editTaskSubmit = functions
 	.https.onCall(
 		async (request_data: any, context: functions.https.CallableContext) => {
 			const isAdmin = await checkAdmin(context);
-			if (!isAdmin) return;
+			if (!isAdmin) return false;
 			request_data.forEach((element: any) => {
 				if (!(typeof element.uid === "string")) {
 					throw new functions.https.HttpsError(
@@ -154,6 +160,7 @@ export const editTaskSubmit = functions
 					.doc(element.uid)
 					.update({ submit: element.visible });
 			});
+			return true;
 		}
 	);
 
@@ -164,7 +171,7 @@ export const deleteTask = functions
 	.https.onCall(
 		async (request_data: any, context: functions.https.CallableContext) => {
 			const isAdmin = await checkAdmin(context);
-			if (!isAdmin) return;
+			if (!isAdmin) return false;
 			request_data.forEach((element: any) => {
 				if (!(typeof element === "string")) {
 					throw new functions.https.HttpsError(
@@ -180,6 +187,7 @@ export const deleteTask = functions
 					.doc(element)
 					.delete();
 			});
+			return true;
 		}
 	);
 
@@ -189,7 +197,7 @@ export const deleteTask = functions
 // 	memory_limit: number,
 // 	problem_id: string,
 // 	source: string,
-// 	tag: Array<string>,
+// 	tags: Array<string>,
 // 	time_limit: number,
 // 	title: string,
 // 	url: string
@@ -198,7 +206,9 @@ export const addTask = functions
 	.region("asia-east2")
 	.https.onCall(
 		async (request_data: any, context: functions.https.CallableContext) => {
-			if (!(typeof request_data.dfficulty === "number")) {
+			console.log(request_data);
+			console.log(typeof request_data.difficulty);
+			if (!(typeof request_data.difficulty === "number")) {
 				throw new functions.https.HttpsError(
 					"invalid-argument",
 					"difficulty must be number"
@@ -245,10 +255,10 @@ export const addTask = functions
 			request_data.solve_count = 0;
 			request_data.visible = false;
 			request_data.submit = false;
-			const uid = await admin
+			const docRef = await admin
 				.firestore()
 				.collection("tasks")
 				.add(request_data);
-			return uid;
+			return docRef.id;
 		}
 	);
