@@ -66,12 +66,22 @@ export const updateAdmin = functions
 			if (!isAdmin) return false;
 			const uid = request_data.uid;
 			const checked = request_data.checked;
-			await admin
-				.firestore()
-				.collection("users")
-				.doc(uid)
-				.update({ admin: checked });
-			return true;
+			try {
+				const docRef = admin
+					.firestore()
+					.collection("users")
+					.doc(uid);
+				const doc = await docRef.get();
+				if (!doc.exists)
+					throw new functions.https.HttpsError(
+						"invalid-argument",
+						"uid not found"
+					);
+				await docRef.update({ admin: checked });
+				return true;
+			} catch (error) {
+				throw new functions.https.HttpsError("unknown", error);
+			}
 		}
 	);
 
@@ -83,18 +93,22 @@ export const getAdminTask = functions
 		async (request_data: any, context: functions.https.CallableContext) => {
 			const isAdmin = await checkAdmin(context);
 			if (!isAdmin) return false;
-			const taskRef = admin
-				.firestore()
-				.collection("tasks")
-				.orderBy("problem_id");
-			const allTask = await taskRef.get();
-			const ret: Object[] = [];
-			allTask.docs.forEach(val => {
-				const data = val.data();
-				data.uid = val.id;
-				ret.push(data);
-			});
-			return ret;
+			try {
+				const taskRef = admin
+					.firestore()
+					.collection("tasks")
+					.orderBy("problem_id");
+				const allTask = await taskRef.get();
+				const ret: Object[] = [];
+				allTask.docs.forEach(val => {
+					const data = val.data();
+					data.uid = val.id;
+					ret.push(data);
+				});
+				return ret;
+			} catch (error) {
+				throw new functions.https.HttpsError("unknown", error);
+			}
 		}
 	);
 
@@ -120,14 +134,24 @@ export const editTaskView = functions
 					);
 				}
 			});
-			request_data.forEach(async (element: any) => {
-				await admin
-					.firestore()
-					.collection("tasks")
-					.doc(element.uid)
-					.update({ visible: element.visible });
-			});
-			return true;
+			try {
+				request_data.forEach(async (element: any) => {
+					const docRef = admin
+						.firestore()
+						.collection("tasks")
+						.doc(element.uid);
+					const doc = await docRef.get();
+					if (!doc.exists)
+						throw new functions.https.HttpsError(
+							"invalid-argument",
+							"uid not found"
+						);
+					await docRef.update({ visible: element.visible });
+				});
+				return true;
+			} catch (error) {
+				throw new functions.https.HttpsError("unknown", error);
+			}
 		}
 	);
 
@@ -153,18 +177,106 @@ export const editTaskSubmit = functions
 					);
 				}
 			});
-			request_data.forEach(async (element: any) => {
-				await admin
-					.firestore()
-					.collection("tasks")
-					.doc(element.uid)
-					.update({ submit: element.visible });
-			});
-			return true;
+			try {
+				request_data.forEach(async (element: any) => {
+					const docRef = admin
+						.firestore()
+						.collection("tasks")
+						.doc(element.uid);
+					const doc = await docRef.get();
+					if (!doc.exists)
+						throw new functions.https.HttpsError(
+							"invalid-argument",
+							"uid not found"
+						);
+					await docRef.update({ submit: element.visible });
+				});
+				return true;
+			} catch (error) {
+				throw new functions.https.HttpsError("unknown", error);
+			}
 		}
 	);
 
-// {string} => array of uid
+// {uid: string, id: string }
+
+export const editTaskID = functions
+	.region("asia-east2")
+	.https.onCall(
+		async (request_data: any, context: functions.https.CallableContext) => {
+			const isAdmin = await checkAdmin(context);
+			if (!isAdmin) return false;
+			if (!(typeof request_data.uid === "string")) {
+				throw new functions.https.HttpsError(
+					"invalid-argument",
+					"uid must be string"
+				);
+			}
+			if (!(typeof request_data.id === "string")) {
+				throw new functions.https.HttpsError(
+					"invalid-argument",
+					"id must be string"
+				);
+			}
+			try {
+				const docRef = admin
+					.firestore()
+					.collection("tasks")
+					.doc(request_data.uid);
+				const doc = await docRef.get();
+				if (!doc.exists)
+					throw new functions.https.HttpsError(
+						"invalid-argument",
+						"uid not found"
+					);
+				await docRef.update({ problem_id: request_data.id });
+				return true;
+			} catch (error) {
+				throw new functions.https.HttpsError("unknown", error);
+			}
+		}
+	);
+
+// {uid: string, title: string }
+
+export const editTaskTitle = functions
+	.region("asia-east2")
+	.https.onCall(
+		async (request_data: any, context: functions.https.CallableContext) => {
+			const isAdmin = await checkAdmin(context);
+			if (!isAdmin) return false;
+			if (!(typeof request_data.uid === "string")) {
+				throw new functions.https.HttpsError(
+					"invalid-argument",
+					"uid must be string"
+				);
+			}
+			if (!(typeof request_data.id === "string")) {
+				throw new functions.https.HttpsError(
+					"invalid-argument",
+					"id must be string"
+				);
+			}
+			try {
+				const docRef = admin
+					.firestore()
+					.collection("tasks")
+					.doc(request_data.uid);
+				const doc = await docRef.get();
+				if (!doc.exists)
+					throw new functions.https.HttpsError(
+						"invalid-argument",
+						"uid not found"
+					);
+				await docRef.update({ title: request_data.title });
+				return true;
+			} catch (error) {
+				throw new functions.https.HttpsError("unknown", error);
+			}
+		}
+	);
+
+// string => array of uid
 
 export const deleteTask = functions
 	.region("asia-east2")
@@ -172,22 +284,28 @@ export const deleteTask = functions
 		async (request_data: any, context: functions.https.CallableContext) => {
 			const isAdmin = await checkAdmin(context);
 			if (!isAdmin) return false;
-			request_data.forEach((element: any) => {
-				if (!(typeof element === "string")) {
-					throw new functions.https.HttpsError(
-						"invalid-argument",
-						"uid must be string"
-					);
-				}
-			});
-			request_data.forEach(async (element: any) => {
-				await admin
+			if (!(typeof request_data === "string")) {
+				throw new functions.https.HttpsError(
+					"invalid-argument",
+					"uid must be string"
+				);
+			}
+			try {
+				const docRef = admin
 					.firestore()
 					.collection("tasks")
-					.doc(element)
-					.delete();
-			});
-			return true;
+					.doc(request_data);
+				const doc = await docRef.get();
+				if (!doc.exists)
+					throw new functions.https.HttpsError(
+						"invalid-argument",
+						"uid not found"
+					);
+				await docRef.delete();
+				return true;
+			} catch (error) {
+				throw new functions.https.HttpsError("unknown", error);
+			}
 		}
 	);
 
@@ -255,10 +373,14 @@ export const addTask = functions
 			request_data.solve_count = 0;
 			request_data.visible = false;
 			request_data.submit = false;
-			const docRef = await admin
-				.firestore()
-				.collection("tasks")
-				.add(request_data);
-			return docRef.id;
+			try {
+				const docRef = await admin
+					.firestore()
+					.collection("tasks")
+					.add(request_data);
+				return docRef.id;
+			} catch (error) {
+				throw new functions.https.HttpsError("unknown", error);
+			}
 		}
 	);
