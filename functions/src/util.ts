@@ -33,7 +33,7 @@ export const writeCode = async (submission_id: string, code: string) => {
 		// Upload file to storage
 		const bucket = admin.storage().bucket();
 		await bucket.upload(tempPath, {
-			destination: "submissions/" + submission_id
+			destination: "submissions/" + submission_id,
 		});
 	} catch (error) {
 		console.log(error);

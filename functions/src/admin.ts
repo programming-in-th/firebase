@@ -43,10 +43,10 @@ export const getAllUser = functions
 				const userListRaw = await admin.auth().listUsers();
 				const userList: Object[] = [];
 				const map = new Map();
-				userDoc.docs.forEach(val => {
+				userDoc.docs.forEach((val) => {
 					map.set(val.data().uid, val.data().admin);
 				});
-				userListRaw.users.forEach(record => {
+				userListRaw.users.forEach((record) => {
 					const nowdata = record.toJSON();
 					(nowdata as any).admin = map.get((nowdata as any).uid);
 					userList.push(nowdata);
@@ -67,10 +67,7 @@ export const updateAdmin = functions
 			const uid = request_data.uid;
 			const checked = request_data.checked;
 			try {
-				const docRef = admin
-					.firestore()
-					.collection("users")
-					.doc(uid);
+				const docRef = admin.firestore().collection("users").doc(uid);
 				const doc = await docRef.get();
 				if (!doc.exists)
 					throw new functions.https.HttpsError(
@@ -100,7 +97,7 @@ export const getAdminTask = functions
 					.orderBy("problem_id");
 				const allTask = await taskRef.get();
 				const ret: Object[] = [];
-				allTask.docs.forEach(val => {
+				allTask.docs.forEach((val) => {
 					const data = val.data();
 					data.uid = val.id;
 					ret.push(data);

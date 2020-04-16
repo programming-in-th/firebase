@@ -36,7 +36,7 @@ export const getRecentSubmissions = functions
 			const submissionDocs = await query.get();
 			// Handles GET requests
 			const submissions: Object[] = [];
-			submissionDocs.docs.forEach(doc => {
+			submissionDocs.docs.forEach((doc) => {
 				const data = doc.data();
 				data.submission_id = doc.id;
 				const firebaseDate = new admin.firestore.Timestamp(
@@ -105,7 +105,7 @@ export const getSubmissionsWithFilter = functions
 				}
 				const submissionDocs = await submissionDocRefs.get();
 				const result: Object[] = [];
-				submissionDocs.docs.forEach(doc => {
+				submissionDocs.docs.forEach((doc) => {
 					const data = doc.data();
 					data.submission_id = doc.id;
 					const firebaseDate = new admin.firestore.Timestamp(
@@ -153,27 +153,29 @@ export const getDetailedSubmissionData = functions
 					.doc("submissions/" + submission_id);
 				const submissionDoc = await submissionDocRef.get();
 				const metadata = submissionDoc.data();
-				const caseResultDocs = (await submissionDocRef
-					.collection("status")
-					.orderBy("case_id")
-					.get()).docs;
+				const caseResultDocs = (
+					await submissionDocRef
+						.collection("status")
+						.orderBy("case_id")
+						.get()
+				).docs;
 				const caseResults: { [key: number]: SubcaseVerdictPair[] } = {};
 				if (caseResultDocs.length) {
-					caseResultDocs.forEach(doc => {
+					caseResultDocs.forEach((doc) => {
 						const data = doc.data();
 						const [
 							subtaskString,
-							subcaseString
+							subcaseString,
 						] = (data.case_id as string).split("/");
 						const [subtask, subcase] = [
 							parseInt(subtaskString),
-							parseInt(subcaseString)
+							parseInt(subcaseString),
 						];
 						const resultObjectToAppend = {
 							subcase: subcase,
 							verdict: data.verdict,
 							time: parseFloat(data.time),
-							memory: parseFloat(data.memory)
+							memory: parseFloat(data.memory),
 						} as SubcaseVerdictPair;
 						if (subtask in caseResults) {
 							caseResults[subtask].push(resultObjectToAppend);
@@ -193,7 +195,7 @@ export const getDetailedSubmissionData = functions
 				const result = {
 					metadata: metadata,
 					code: code,
-					case_results: caseResults
+					case_results: caseResults,
 				};
 				return result;
 			} catch (error) {
@@ -251,7 +253,7 @@ export const getOldestSubmissionsInQueue = functions
 					const data = {
 						...doc.data(),
 						submission_id: doc.id,
-						code: code
+						code: code,
 					};
 					result.push(data);
 				}
@@ -315,17 +317,17 @@ export const makeSubmission = functions
 				// Get username for user id
 				const username = (await admin.auth().getUser(context.auth.uid))
 					.displayName;
-				const problem_snapshot = (await admin
-					.firestore()
-					.collection("tasks")
-					.where("problem_id", "==", problem_id)
-					.get()).docs[0];
+				const problem_snapshot = (
+					await admin
+						.firestore()
+						.collection("tasks")
+						.where("problem_id", "==", problem_id)
+						.get()
+				).docs[0];
 				const problem_name = problem_snapshot.data().title;
 				// Create new submission entry in Firestore
-				const submissionID = (await admin
-					.firestore()
-					.collection("submissions")
-					.add({
+				const submissionID = (
+					await admin.firestore().collection("submissions").add({
 						language: language,
 						memory: -1,
 						points: -1,
@@ -336,8 +338,9 @@ export const makeSubmission = functions
 						timestamp: admin.firestore.Timestamp.now(),
 						uid: uid,
 						username: username,
-						hideCode: hideCode
-					})).id;
+						hideCode: hideCode,
+					})
+				).id;
 				// Write code to tmp file
 				await writeCode(submissionID, code);
 				return submissionID;

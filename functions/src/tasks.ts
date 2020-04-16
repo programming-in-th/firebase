@@ -13,7 +13,7 @@ export const getAllTasks = functions
 				.where("visible", "==", true);
 			const taskDocs = await taskDocRefs.get();
 			const result: Object[] = [];
-			taskDocs.docs.forEach(doc => {
+			taskDocs.docs.forEach((doc) => {
 				const data = doc.data();
 				result.push(data);
 			});
@@ -36,7 +36,7 @@ export const getAllProblemIDs = functions
 				.where("visible", "==", true);
 			const taskDocs = await taskDocRefs.get();
 			const result: Object[] = [];
-			taskDocs.docs.forEach(doc => {
+			taskDocs.docs.forEach((doc) => {
 				const data = doc.data();
 				result.push(data.problem_id);
 			});
