@@ -68,7 +68,12 @@ export const getProblemMetadata = functions
 				.get();
 			if (taskSnapshot.docs.length === 0) res.send({});
 			else if (taskSnapshot.docs.length === 1) {
-				res.send(taskSnapshot.docs[0].data());
+				const data = taskSnapshot.docs[0].data();
+				if (data.visible === true) {
+					res.send(taskSnapshot.docs[0].data());
+				} else {
+					res.send({});
+				}
 			} else {
 				throw new Error("Duplicate snapshots found!!!");
 			}
