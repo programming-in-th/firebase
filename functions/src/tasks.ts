@@ -51,12 +51,12 @@ export const getProblemMetadata = functions
 	.region("asia-east2")
 	.https.onRequest(async (req, res) => {
 		res.set("Access-Control-Allow-Origin", "*");
-		const problem_id = req.query.id;
+		const id = req.query.id;
 
-		if (!(typeof problem_id === "string")) {
+		if (!(typeof id === "string")) {
 			throw new functions.https.HttpsError(
 				"invalid-argument",
-				"problem ID must be a string, given problem ID = " + problem_id
+				"problem ID must be a string, given problem ID = " + id
 			);
 		}
 
@@ -64,7 +64,7 @@ export const getProblemMetadata = functions
 			const taskSnapshot = await admin
 				.firestore()
 				.collection("tasks")
-				.where("problem_id", "==", problem_id)
+				.where("id", "==", id)
 				.get();
 			if (taskSnapshot.docs.length === 0) res.send({});
 			else if (taskSnapshot.docs.length === 1) {
