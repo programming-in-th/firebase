@@ -21,14 +21,14 @@ export const getRecentSubmissions = functions
 				.orderBy("timestamp", "desc");
 
 			if (limit) {
-				query = query.limit(limit);
+				query = query.limit(+limit);
 			}
 
 			if (last_document_id) {
 				const last_document = await admin
 					.firestore()
 					.collection("submissions")
-					.doc(last_document_id)
+					.doc(last_document_id as string)
 					.get();
 				query = query.startAfter(last_document);
 			}
