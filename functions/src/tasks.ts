@@ -38,7 +38,7 @@ export const getAllProblemIDs = functions
 			const result: Object[] = [];
 			taskDocs.docs.forEach((doc) => {
 				const data = doc.data();
-				result.push(data.problem_id);
+				result.push(data.id);
 			});
 
 			res.send(result);
