@@ -1,29 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
-export const getAllTasks = functions
-	.region("asia-east2")
-	.https.onRequest(async (req, res) => {
-		res.set("Access-Control-Allow-Origin", "*");
-
-		try {
-			const taskDocRefs = admin
-				.firestore()
-				.collection("tasks")
-				.where("visible", "==", true);
-			const taskDocs = await taskDocRefs.get();
-			const result: Object[] = [];
-			taskDocs.docs.forEach((doc) => {
-				const data = doc.data();
-				result.push(data);
-			});
-
-			res.send(result);
-		} catch (error) {
-			throw new functions.https.HttpsError("unknown", error);
-		}
-	});
-
 export const getAllProblemIDs = functions
 	.region("asia-east2")
 	.https.onRequest(async (req, res) => {
