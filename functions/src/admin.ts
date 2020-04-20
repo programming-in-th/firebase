@@ -26,7 +26,10 @@ export const checkAdmin = async (context: functions.https.CallableContext) => {
 export const getIsAdmin = functions
 	.region("asia-east2")
 	.https.onCall(
-		async (request_data: any, context: functions.https.CallableContext) => {
+		async (
+			request_data: functions.https.Request,
+			context: functions.https.CallableContext
+		) => {
 			return checkAdmin(context);
 		}
 	);

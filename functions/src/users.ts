@@ -13,7 +13,7 @@ export const onRegister = functions
 				const uid = user.uid;
 				const data = {
 					uid: uid,
-					display_name: user.displayName,
+					displayName: user.displayName,
 					admin: false,
 				};
 				await admin.firestore().collection("users").doc(uid).set(data);
