@@ -27,7 +27,6 @@ export const readCode = async (id: string) => {
 };
 
 export const writeCode = async (id: string, code: Array<string>) => {
-	console.log(id, code);
 	try {
 		for (var i = 0; i < code.length; i++) {
 			const tempPath = path.join(os.tmpdir(), i.toString());
