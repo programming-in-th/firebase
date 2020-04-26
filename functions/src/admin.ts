@@ -7,7 +7,7 @@ export const checkAdmin = async (context: functions.https.CallableContext) => {
 	if (!(typeof uid === "string")) {
 		throw new functions.https.HttpsError(
 			"invalid-argument",
-			"admin UID must be a string, given UID = " + uid
+			`admin UID must be a string, given UID = ${uid}`
 		);
 	}
 	try {

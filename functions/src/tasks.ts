@@ -36,7 +36,7 @@ export const getProblemMetadata = functions
 			if (!(typeof id === "string")) {
 				throw new functions.https.HttpsError(
 					"invalid-argument",
-					"problem ID must be a string, given problem ID = " + id
+					`problem ID must be a string, given problem ID = ${id}`
 				);
 			}
 

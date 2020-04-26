@@ -50,7 +50,7 @@ export const writeCode = async (id: string, code: Array<string>) => {
 			fs.writeFileSync(tempPath, code[i]);
 			const bucket = admin.storage().bucket();
 			await bucket.upload(tempPath, {
-				destination: "submissions/" + id + "/" + i.toString(),
+				destination: `submissions/${id}/${i.toString()}`,
 			});
 		}
 	} catch (error) {
@@ -80,7 +80,7 @@ export const unzipCode = async (code: string, probID: string) => {
 		await bucket.upload(tempZpath, {
 			destination: `${id}/file.zip`,
 		});
-		const zipFile = await bucket.file(`${id}/file.zip`);
+		const zipFile = bucket.file(`${id}/file.zip`);
 		await zipFile
 			.createReadStream()
 			.pipe(unzipper.Parse())
@@ -106,7 +106,7 @@ export const unzipCode = async (code: string, probID: string) => {
 			});
 			return returnArray;
 		} else {
-			throw new Error("Task have problem");
+			throw new Error("Problem with Task");
 		}
 	} catch (error) {
 		throw error;
