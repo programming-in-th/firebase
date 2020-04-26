@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import { unzipCode, readCode, writeCode } from "./util";
+import { unzipCode, writeCode } from "./util";
 import { checkAdmin } from "./admin";
 
 export const makeSubmission = functions
@@ -68,29 +68,6 @@ export const makeSubmission = functions
 				} else {
 					throw new Error("Have Problem with task!!!");
 				}
-			} catch (error) {
-				throw new functions.https.HttpsError("unknown", error);
-			}
-		}
-	);
-
-export const getSubmission = functions
-	.region("asia-east2")
-	.https.onRequest(
-		async (req: functions.https.Request, res: functions.Response) => {
-			res.set("Access-Control-Allow-Origin", "*");
-			const id = req.query.id as string;
-			if (!(typeof id === "string")) {
-				throw new functions.https.HttpsError(
-					"invalid-argument",
-					"problem ID must be a string, given problem ID = " + id
-				);
-			}
-			console.log("YES");
-			try {
-				const tmp = await readCode(id);
-				console.log(tmp);
-				res.send(tmp);
 			} catch (error) {
 				throw new functions.https.HttpsError("unknown", error);
 			}
