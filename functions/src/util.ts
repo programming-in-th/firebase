@@ -71,7 +71,7 @@ const makeid = (length: number) => {
 	return result;
 };
 
-export const unzipCode = async (code: string, probID: string) => {
+export const unzipCode = async (code: string, fileName: Array<string>) => {
 	try {
 		const id = makeid(20);
 		const bucket = admin.storage().bucket();
@@ -90,24 +90,14 @@ export const unzipCode = async (code: string, probID: string) => {
 			})
 			.promise();
 		const returnArray: Array<string> = [];
-		const taskSnapshot = await admin
-			.firestore()
-			.collection("tasks")
-			.where("id", "==", probID)
-			.get();
-		if (taskSnapshot.docs.length === 1) {
-			const data = taskSnapshot.docs[0].data();
-			for (const element of data.fileName) {
-				const readCode = await readFile(`${id}/${element}`);
-				returnArray.push(readCode);
-			}
-			await bucket.deleteFiles({
-				prefix: `${id}/`,
-			});
-			return returnArray;
-		} else {
-			throw new Error("Problem with Task");
+		for (const element of fileName) {
+			const readCode = await readFile(`${id}/${element}`);
+			returnArray.push(readCode);
 		}
+		await bucket.deleteFiles({
+			prefix: `${id}/`,
+		});
+		return returnArray;
 	} catch (error) {
 		throw error;
 	}
