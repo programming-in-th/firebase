@@ -10,10 +10,10 @@ To test with production database (running the functions server locally), run fol
 `export GOOGLE_APPLICATION_CREDENTIALS="[PATH_TO_THIS_REPO]/cred.json"`
 
 To start the server, make sure you are in the "functions" directory found within the repo and run following command in terminal:
-`npm run-script build && npm run-script serve`
+`npm run-script serve`
 
-To make requests to the local server, run:
-`curl -H 'Content-Type: application/json' LOCAL_URL_HERE -X POST -d '{"data":YOUR_DATA_OBJECT_HERE}'`
+To make requests to the local server, 
+add `.useFunctionsEmulator()` to `src/lib/firebase.ts` and change baseURL in `src/config.ts`
 
 To deploy, run in the "functions" directory:
 `npm run-script deploy`
