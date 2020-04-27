@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import { unzipCode, readCode, writeCode } from './util'
-import { checkAdmin, getIsAdmin } from './admin'
+import { checkAdmin } from './admin'
 
 export const makeSubmission = functions
   .region('asia-east2')
