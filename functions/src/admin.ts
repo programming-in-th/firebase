@@ -11,11 +11,7 @@ export const checkAdmin = async (context: functions.https.CallableContext) => {
     )
   }
   try {
-    const userSnapshot = await admin
-      .firestore()
-      .collection('users')
-      .doc(uid)
-      .get()
+    const userSnapshot = await admin.firestore().doc(`users/${uid}`).get()
     if (!userSnapshot.exists) return false
     return userSnapshot.data()!.admin
   } catch (error) {

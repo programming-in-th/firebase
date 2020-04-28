@@ -43,7 +43,7 @@ export const writeCode = async (id: string, code: Array<string>) => {
   }
 }
 
-export const unzipCode = async (code: string, fileName: Array<string>) => {
+export const unzipCode = async (code: string, fileName: string[]) => {
   const tempZIPpath = path.join(os.tmpdir(), 'file.zip')
   fs.writeFileSync(tempZIPpath, code, 'base64')
 

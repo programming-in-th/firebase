@@ -46,8 +46,7 @@ export const getProblemMetadata = functions
           .collection('tasks')
           .where('id', '==', id)
           .get()
-        if (taskSnapshot.docs.length === 0) res.send({})
-        else if (taskSnapshot.docs.length === 1) {
+        if (taskSnapshot.docs.length === 1) {
           const data = taskSnapshot.docs[0].data()
           if (data.visible === true) {
             res.send(taskSnapshot.docs[0].data())
@@ -55,7 +54,7 @@ export const getProblemMetadata = functions
             res.send({})
           }
         } else {
-          throw new Error('Duplicate snapshots found!!!')
+          throw new functions.https.HttpsError('aborted', 'Task fetching error')
         }
       } catch (error) {
         throw new functions.https.HttpsError('unknown', error)

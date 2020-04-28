@@ -13,7 +13,7 @@ export const onRegister = functions
           displayName: user.displayName,
           admin: false,
         }
-        await admin.firestore().collection('users').doc(uid).set(data)
+        await admin.firestore().doc(`users/${uid}`).set(data)
       } catch (error) {
         console.log('Error adding registration of user to database')
         console.log(error)

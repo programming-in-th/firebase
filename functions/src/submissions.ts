@@ -11,6 +11,10 @@ export const makeSubmission = functions
       let code = requestData.code
       const uid = context.auth?.uid
 
+      if (context.auth === undefined) {
+        throw new functions.https.HttpsError('unauthenticated', 'Please login')
+      }
+
       if (!(typeof id === 'string') || id.length === 0) {
         throw new functions.https.HttpsError(
           'invalid-argument',
@@ -65,10 +69,13 @@ export const makeSubmission = functions
             await writeCode(submissionID, code)
             return submissionID
           } else {
-            throw new Error('Permission denied')
+            throw new functions.https.HttpsError(
+              'permission-denied',
+              'Task Permission denied'
+            )
           }
         } else {
-          throw new Error('Task fetching error')
+          throw new functions.https.HttpsError('aborted', 'Task fetching error')
         }
       } catch (error) {
         throw new functions.https.HttpsError('unknown', error)
@@ -81,6 +88,9 @@ export const getDetailedSubmissionData = functions
   .https.onCall(
     async (requestData: any, context: functions.https.CallableContext) => {
       const submissionID = requestData?.submissionID
+      if (context.auth === undefined) {
+        throw new functions.https.HttpsError('unauthenticated', 'Please login')
+      }
       if (!(typeof submissionID === 'string') || submissionID.length === 0) {
         throw new functions.https.HttpsError(
           'invalid-argument',
