@@ -11,8 +11,6 @@ export const readCode = async (id: string, len: number) => {
     for (let i = 0; i < len; ++i) {
       const filePath = `submissions/${id}/${i.toString()}`
       const tempPath = path.join(os.tmpdir(), 'temp')
-      console.log('filePath =>', filePath)
-      console.log('tempPath =>', tempPath)
       await admin
         .storage()
         .bucket()
