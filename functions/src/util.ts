@@ -3,6 +3,7 @@ import * as unzipper from 'unzipper'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
+import * as crypto from 'crypto'
 
 export const readCode = async (id: string, len: number) => {
   try {
@@ -44,14 +45,17 @@ export const writeCode = async (id: string, code: Array<string>) => {
 }
 
 export const unzipCode = async (code: string, fileName: string[]) => {
-  const tempZIPpath = path.join(os.tmpdir(), 'file.zip')
+  const tempID = crypto.randomBytes(20).toString('hex')
+  const tempZIPpath = path.join(os.tmpdir(), tempID, 'file.zip')
   fs.writeFileSync(tempZIPpath, code, 'base64')
 
-  fs.createReadStream(tempZIPpath).pipe(unzipper.Extract({ path: os.tmpdir() }))
+  fs.createReadStream(tempZIPpath).pipe(
+    unzipper.Extract({ path: path.join(os.tmpdir(), tempID) })
+  )
   const returnArray: string[] = []
 
   for (const element of fileName) {
-    const codeRead = fs.readFileSync(path.join(os.tmpdir(), element), {
+    const codeRead = fs.readFileSync(path.join(os.tmpdir(), tempID, element), {
       encoding: 'utf8',
     })
 
