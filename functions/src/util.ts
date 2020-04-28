@@ -4,19 +4,14 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
 
-export const readCode = async (id: string) => {
+export const readCode = async (id: string, len: number) => {
   try {
-    const submissionDoc = await admin.firestore().doc(`submissions/${id}`).get()
-    const taskDoc = submissionDoc.data()?.task
-    const type = taskDoc.type
-    let len = 1
-    if (type !== 'normal') {
-      len = taskDoc.fileName.length
-    }
     const responseCode: string[] = []
     for (let i = 0; i < len; ++i) {
-      const filePath = path.join('submissions', id, i.toString())
+      const filePath = `submissions/${id}/${i.toString()}`
       const tempPath = path.join(os.tmpdir(), 'temp')
+      console.log('filePath =>', filePath)
+      console.log('tempPath =>', tempPath)
       await admin
         .storage()
         .bucket()

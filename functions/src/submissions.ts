@@ -53,7 +53,6 @@ export const makeSubmission = functions
                 )
               }
             }
-
             const submissionID = (
               await admin.firestore().collection('submissions').add({
                 problemID: id,
@@ -63,7 +62,6 @@ export const makeSubmission = functions
                 uid: uid,
               })
             ).id
-
             await writeCode(submissionID, code)
             return submissionID
           } else {
@@ -83,7 +81,6 @@ export const getDetailedSubmissionData = functions
   .https.onCall(
     async (requestData: any, context: functions.https.CallableContext) => {
       const submissionID = requestData?.submissionID
-
       if (!(typeof submissionID === 'string') || submissionID.length === 0) {
         throw new functions.https.HttpsError(
           'invalid-argument',
@@ -116,10 +113,22 @@ export const getDetailedSubmissionData = functions
 
         const humanTimestamp = firebaseDate.toDate().toLocaleString()
 
-        const code = await readCode(submissionID)
+        const codelen =
+          submissionDoc?.type === 'normal' ? 1 : taskDoc?.fileName.length
+
+        const code = await readCode(submissionID, codelen)
+
+        const userDocRef = await admin
+          .firestore()
+          .doc(`users/${submissionDoc?.uid}`)
+          .get()
+        const userDoc = userDocRef.data()
+
+        delete submissionDoc?.uid
 
         return {
           ...submissionDoc,
+          username: userDoc?.displayName,
           ID: submissionID,
           task: taskDoc,
           humanTimestamp,
