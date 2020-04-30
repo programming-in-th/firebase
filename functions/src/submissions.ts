@@ -1,7 +1,6 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
-import { unzipCode, readCode, writeCode } from './util'
-import { checkAdmin } from './admin'
+import { unzipCode, readCode, writeCode, isAdmin } from './util'
 
 export const makeSubmission = functions
   .region('asia-east2')
@@ -46,7 +45,7 @@ export const makeSubmission = functions
         if (taskSnapshot.docs.length === 1) {
           const taskDoc = taskSnapshot.docs[0].data()
 
-          if (taskDoc.visible === true || checkAdmin(context)) {
+          if (taskDoc.visible === true || isAdmin(context)) {
             if (typeof code === 'string') {
               code = await unzipCode(code, taskDoc.fileName)
 
@@ -110,7 +109,7 @@ export const getDetailedSubmissionData = functions
           .get()
         const taskDoc = taskSnapshot.docs[0].data()
 
-        if (!(taskDoc.visible || checkAdmin(context))) {
+        if (!(taskDoc.visible || isAdmin(context))) {
           return {}
         }
         const firebaseDate = new admin.firestore.Timestamp(

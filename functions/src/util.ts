@@ -1,4 +1,5 @@
 import * as admin from 'firebase-admin'
+import * as functions from 'firebase-functions'
 import * as unzipper from 'unzipper'
 import * as path from 'path'
 import * as fs from 'fs'
@@ -65,4 +66,21 @@ export const unzipCode = async (code: string, fileName: string[]) => {
     returnArray.push(codeRead)
   }
   return returnArray
+}
+
+export const isAdmin = async (context: functions.https.CallableContext) => {
+  if (!context.auth) return false
+  const uid = context?.auth.uid
+  try {
+    const userSnapshot = await admin.firestore().doc(`users/${uid}`).get()
+    if (!userSnapshot.exists) {
+      throw new functions.https.HttpsError(
+        'data-loss',
+        'user not found in database'
+      )
+    }
+    return userSnapshot.data()?.admin
+  } catch (error) {
+    throw new functions.https.HttpsError('unknown', error)
+  }
 }
