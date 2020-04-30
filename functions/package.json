@@ -1,13 +1,14 @@
 {
   "name": "functions",
+  "start:emulators": "firebase emulators:start --only functions",
+  "ts:watch": "tsc --watch",
   "scripts": {
     "lint": "tslint --project tsconfig.json",
     "build": "tsc",
-    "serve": "npm run build && firebase serve --only functions",
-    "shell": "npm run build && firebase functions:shell",
-    "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "ts:watch": "tsc --watch",
+    "start:emulators": "firebase emulators:start --only functions",
+    "dev": "concurrently --kill-others \"npm run-script start:emulators\" \"npm run-script ts:watch\"",
+    "deploy": "firebase deploy --only functions"
   },
   "engines": {
     "node": "8"
