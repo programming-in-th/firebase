@@ -13,4 +13,5 @@ Change directory to `functions` and run `npm run-script serve`
 To make requests to the local server,
 add `.useFunctionsEmulator()` to `src/lib/firebase.ts` and change baseURL in `src/config.ts`
 
-To deploy push to `default` branch
+## Deploy
+push to `default` branch
