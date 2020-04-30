@@ -3,17 +3,16 @@ import * as admin from 'firebase-admin'
 
 export const checkAdmin = async (context: functions.https.CallableContext) => {
   if (!context.auth) return false
-  const uid = context.auth ? context.auth.uid : ''
-  if (!(typeof uid === 'string')) {
-    throw new functions.https.HttpsError(
-      'invalid-argument',
-      `admin UID must be a string, given UID = ${uid}`
-    )
-  }
+  const uid = context?.auth.uid
   try {
     const userSnapshot = await admin.firestore().doc(`users/${uid}`).get()
-    if (!userSnapshot.exists) return false
-    return userSnapshot.data()!.admin
+    if (!userSnapshot.exists) {
+      throw new functions.https.HttpsError(
+        'data-loss',
+        'user not found in database'
+      )
+    }
+    return userSnapshot.data()?.admin
   } catch (error) {
     throw new functions.https.HttpsError('unknown', error)
   }

@@ -88,9 +88,6 @@ export const getDetailedSubmissionData = functions
   .https.onCall(
     async (requestData: any, context: functions.https.CallableContext) => {
       const submissionID = requestData?.submissionID
-      if (context.auth === undefined) {
-        throw new functions.https.HttpsError('unauthenticated', 'Please login')
-      }
       if (!(typeof submissionID === 'string') || submissionID.length === 0) {
         throw new functions.https.HttpsError(
           'invalid-argument',

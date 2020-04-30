@@ -9,7 +9,6 @@ export const onRegister = functions
       try {
         const uid = user.uid
         const data = {
-          uid: uid,
           displayName: user.displayName,
           admin: false,
         }
