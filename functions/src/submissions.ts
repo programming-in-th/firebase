@@ -170,12 +170,14 @@ export const getSubmissions = functions
             .collection('users')
             .where('displayName', '==', req.query.displayName)
             .get()
+
           if (userDocs.docs.length !== 1) {
             throw new functions.https.HttpsError(
               'aborted',
               'User fetching error'
             )
           }
+
           const uid = userDocs.docs[0].id
           submissionRef = submissionRef.where('uid', '==', uid)
         }
@@ -185,7 +187,7 @@ export const getSubmissions = functions
           submissionRef = submissionRef.where('taskID', '==', taskID)
         }
 
-        submissionRef.limit(offset)
+        submissionRef = submissionRef.offset(offset).limit(10)
         const submissionDocs = await submissionRef.get()
 
         const temp: Object[] = []
