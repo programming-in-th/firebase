@@ -14,11 +14,7 @@ export const onRegister = functions
     async (user: admin.auth.UserRecord, context: functions.EventContext) => {
       try {
         const uid = user.uid
-        const data = {
-          ...initialUser,
-          displayName: user.displayName,
-        }
-        await admin.firestore().doc(`users/${uid}`).set(data)
+        await admin.firestore().doc(`users/${uid}`).set(initialUser)
       } catch (error) {
         throw new functions.https.HttpsError('unknown', error)
       }
