@@ -119,8 +119,7 @@ export const getDetailedSubmissionData = functions
 
         const humanTimestamp = firebaseDate.toDate().toLocaleString()
 
-        const codelen =
-          submission?.type === 'normal' ? 1 : task?.fileName.length
+        const codelen = task.type === 'normal' ? 1 : task.fileName.length
 
         const code = await readCode(submissionID, codelen)
 
