@@ -203,39 +203,43 @@ export const getSubmissions = functions
 
           const task = taskDocs.docs[0].data()
 
-          const firebaseDate = new admin.firestore.Timestamp(
-            data.timestamp._seconds,
-            data.timestamp._nanoseconds
-          )
+          if (task.visible) {
+            const firebaseDate = new admin.firestore.Timestamp(
+              data.timestamp._seconds,
+              data.timestamp._nanoseconds
+            )
 
-          const username = userDoc.data()?.displayName
-          const timestamp = data.timestamp
-          const humanTimestamp = firebaseDate.toDate().toLocaleString()
-          const language = data.language
-          const points = data.points
-          const taskTitle = task.title
-          let time = 0,
-            memory = 0
+            const username = userDoc.data()?.displayName
+            const timestamp = data.timestamp
+            const humanTimestamp = firebaseDate.toDate().toLocaleString()
+            const language = data.language
+            const points = data.points
+            const taskTitle = task.title
+            let time = 0,
+              memory = 0
 
-          if (data.groups) {
-            for (const group of data.groups) {
-              for (const status of group.status) {
-                time = Math.max(time, status.time)
-                memory = Math.max(memory, status.memory)
+            if (data.groups) {
+              for (const group of data.groups) {
+                for (const status of group.status) {
+                  time = Math.max(time, status.time)
+                  memory = Math.max(memory, status.memory)
+                }
               }
             }
-          }
 
-          temp.push({
-            username,
-            timestamp,
-            humanTimestamp,
-            language,
-            points,
-            taskTitle,
-            time,
-            memory,
-          })
+            temp.push({
+              username,
+              timestamp,
+              humanTimestamp,
+              language,
+              points,
+              taskTitle,
+              time,
+              memory,
+            })
+          } else {
+            temp.push({})
+          }
         }
 
         res.send(temp)
