@@ -31,14 +31,14 @@ export const getUserContext = functions
       if (!context.auth) return initialUser
       try {
         const uid = context.auth.uid
-        const userSnapshot = await admin.firestore().doc(`users/${uid}`).get()
-        if (!userSnapshot.exists) {
+        const userDoc = await admin.firestore().doc(`users/${uid}`).get()
+        if (!userDoc.exists) {
           throw new functions.https.HttpsError(
             'data-loss',
             'user not found in database'
           )
         }
-        return userSnapshot.data()
+        return userDoc.data()
       } catch (error) {
         throw new functions.https.HttpsError('unknown', error)
       }

@@ -8,16 +8,16 @@ export const getAllProblemIDs = functions
       res.set('Access-Control-Allow-Origin', '*')
 
       try {
-        const taskDocRefs = admin
+        const taskDocs = await admin
           .firestore()
           .collection('tasks')
           .where('visible', '==', true)
-        const taskDocs = await taskDocRefs.get()
+          .get()
         const result: Object[] = []
-        taskDocs.docs.forEach((doc) => {
+        for (const doc of taskDocs.docs) {
           const data = doc.data()
           result.push(data.id)
-        })
+        }
 
         res.send(result)
       } catch (error) {
@@ -41,15 +41,15 @@ export const getProblemMetadata = functions
       }
 
       try {
-        const taskSnapshot = await admin
+        const taskDocs = await admin
           .firestore()
           .collection('tasks')
           .where('id', '==', id)
           .get()
-        if (taskSnapshot.docs.length === 1) {
-          const data = taskSnapshot.docs[0].data()
+        if (taskDocs.docs.length === 1) {
+          const data = taskDocs.docs[0].data()
           if (data.visible === true) {
-            res.send(taskSnapshot.docs[0].data())
+            res.send(taskDocs.docs[0].data())
           } else {
             res.send({})
           }

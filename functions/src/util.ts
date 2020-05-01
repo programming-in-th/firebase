@@ -72,14 +72,14 @@ export const isAdmin = async (context: functions.https.CallableContext) => {
   if (!context.auth) return false
   const uid = context?.auth.uid
   try {
-    const userSnapshot = await admin.firestore().doc(`users/${uid}`).get()
-    if (!userSnapshot.exists) {
+    const userDoc = await admin.firestore().doc(`users/${uid}`).get()
+    if (!userDoc.exists) {
       throw new functions.https.HttpsError(
         'data-loss',
         'user not found in database'
       )
     }
-    return userSnapshot.data()?.admin
+    return userDoc.data()?.admin
   } catch (error) {
     throw new functions.https.HttpsError('unknown', error)
   }

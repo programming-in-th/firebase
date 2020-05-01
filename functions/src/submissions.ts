@@ -36,18 +36,18 @@ export const makeSubmission = functions
       }
 
       try {
-        const taskSnapshot = await admin
+        const taskDocs = await admin
           .firestore()
           .collection('tasks')
           .where('id', '==', id)
           .get()
 
-        if (taskSnapshot.docs.length === 1) {
-          const taskDoc = taskSnapshot.docs[0].data()
+        if (taskDocs.docs.length === 1) {
+          const task = taskDocs.docs[0].data()
 
-          if (taskDoc.visible === true || isAdmin(context)) {
+          if (task.visible === true || isAdmin(context)) {
             if (typeof code === 'string') {
-              code = await unzipCode(code, taskDoc.fileName)
+              code = await unzipCode(code, task.fileName)
 
               if (!Array.isArray(code)) {
                 throw new functions.https.HttpsError(
@@ -95,48 +95,48 @@ export const getDetailedSubmissionData = functions
       }
 
       try {
-        const submissionDocRef = await admin
+        const submissionDoc = await admin
           .firestore()
           .doc(`submissions/${submissionID}`)
           .get()
-        const submissionDoc = submissionDocRef.data()
+        const submission = submissionDoc.data()
 
-        const taskID = submissionDoc?.taskID
-        const taskSnapshot = await admin
+        const taskID = submission?.taskID
+        const taskDocs = await admin
           .firestore()
           .collection('tasks')
           .where('id', '==', taskID)
           .get()
-        const taskDoc = taskSnapshot.docs[0].data()
+        const task = taskDocs.docs[0].data()
 
-        if (!(taskDoc.visible || isAdmin(context))) {
+        if (!(task.visible || isAdmin(context))) {
           return {}
         }
         const firebaseDate = new admin.firestore.Timestamp(
-          submissionDoc?.timestamp._seconds,
-          submissionDoc?.timestamp._nanoseconds
+          submission?.timestamp._seconds,
+          submission?.timestamp._nanoseconds
         )
 
         const humanTimestamp = firebaseDate.toDate().toLocaleString()
 
         const codelen =
-          submissionDoc?.type === 'normal' ? 1 : taskDoc?.fileName.length
+          submission?.type === 'normal' ? 1 : task?.fileName.length
 
         const code = await readCode(submissionID, codelen)
 
-        const userDocRef = await admin
+        const userDoc = await admin
           .firestore()
-          .doc(`users/${submissionDoc?.uid}`)
+          .doc(`users/${submission?.uid}`)
           .get()
-        const userDoc = userDocRef.data()
+        const user = userDoc.data()
 
-        delete submissionDoc?.uid
+        delete submission?.uid
 
         return {
-          ...submissionDoc,
-          username: userDoc?.displayName,
+          ...submission,
+          username: user?.displayName,
           ID: submissionID,
-          task: taskDoc,
+          task,
           humanTimestamp,
           code,
         }
@@ -188,35 +188,32 @@ export const getSubmissions = functions
         submissionRef.limit(offset)
         const submissionDocs = await submissionRef.get()
 
-        const temp = []
+        const temp: Object[] = []
 
         for (const doc of submissionDocs.docs) {
           const data = doc.data()
 
-          const userDocRef = await admin
-            .firestore()
-            .doc(`users/${data.uid}`)
-            .get()
+          const userDoc = await admin.firestore().doc(`users/${data.uid}`).get()
 
-          const taskSnapshot = await admin
+          const taskDocs = await admin
             .firestore()
             .collection('tasks')
             .where('id', '==', data.taskID)
             .get()
 
-          const taskDoc = taskSnapshot.docs[0].data()
+          const task = taskDocs.docs[0].data()
 
           const firebaseDate = new admin.firestore.Timestamp(
             data.timestamp._seconds,
             data.timestamp._nanoseconds
           )
 
-          const username = userDocRef.data()?.displayName
+          const username = userDoc.data()?.displayName
           const timestamp = data.timestamp
           const humanTimestamp = firebaseDate.toDate().toLocaleString()
           const language = data.language
           const points = data.points
-          const taskTitle = taskDoc.title
+          const taskTitle = task.title
           let time = 0,
             memory = 0
 
