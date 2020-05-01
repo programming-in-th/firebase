@@ -1,7 +1,5 @@
 {
   "name": "functions",
-  "start:emulators": "firebase emulators:start --only functions",
-  "ts:watch": "tsc --watch",
   "scripts": {
     "lint": "tslint --project tsconfig.json",
     "build": "tsc",
