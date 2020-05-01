@@ -151,13 +151,16 @@ export const getSubmissions = functions
   .https.onRequest(
     async (req: functions.https.Request, res: functions.Response) => {
       res.set('Access-Control-Allow-Origin', '*')
+
       if (!req.query.offset) {
         throw new functions.https.HttpsError(
           'not-found',
           'please insert offset'
         )
       }
+
       const offset = parseInt(req.query.offset as string)
+
       try {
         let submissionRef = admin
           .firestore()

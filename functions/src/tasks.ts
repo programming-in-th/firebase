@@ -13,7 +13,9 @@ export const getAllProblemIDs = functions
           .collection('tasks')
           .where('visible', '==', true)
           .get()
+
         const result: Object[] = []
+
         for (const doc of taskDocs.docs) {
           const data = doc.data()
           result.push(data.id)
@@ -46,13 +48,10 @@ export const getProblemMetadata = functions
           .collection('tasks')
           .where('id', '==', id)
           .get()
+
         if (taskDocs.docs.length === 1) {
           const data = taskDocs.docs[0].data()
-          if (data.visible === true) {
-            res.send(taskDocs.docs[0].data())
-          } else {
-            res.send({})
-          }
+          res.send(data.visible ? data : {})
         } else {
           throw new functions.https.HttpsError('aborted', 'Task fetching error')
         }

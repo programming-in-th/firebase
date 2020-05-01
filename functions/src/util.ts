@@ -70,7 +70,9 @@ export const unzipCode = async (code: string, fileName: string[]) => {
 
 export const isAdmin = async (context: functions.https.CallableContext) => {
   if (!context.auth) return false
+
   const uid = context?.auth.uid
+
   try {
     const userDoc = await admin.firestore().doc(`users/${uid}`).get()
     if (!userDoc.exists) {
