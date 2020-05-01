@@ -58,7 +58,7 @@ export const makeSubmission = functions
             }
             const submissionID = (
               await admin.firestore().collection('submissions').add({
-                problemID: id,
+                taskID: id,
                 language: lang,
                 points: -1,
                 timestamp: admin.firestore.Timestamp.now(),
@@ -101,11 +101,11 @@ export const getDetailedSubmissionData = functions
           .get()
         const submissionDoc = submissionDocRef.data()
 
-        const problemID = submissionDoc?.problemID
+        const taskID = submissionDoc?.taskID
         const taskSnapshot = await admin
           .firestore()
           .collection('tasks')
-          .where('id', '==', problemID)
+          .where('id', '==', taskID)
           .get()
         const taskDoc = taskSnapshot.docs[0].data()
 
@@ -140,6 +140,108 @@ export const getDetailedSubmissionData = functions
           humanTimestamp,
           code,
         }
+      } catch (error) {
+        throw new functions.https.HttpsError('unknown', error)
+      }
+    }
+  )
+
+export const getSubmissions = functions
+  .region('asia-east2')
+  .https.onRequest(
+    async (req: functions.https.Request, res: functions.Response) => {
+      res.set('Access-Control-Allow-Origin', '*')
+      if (!req.query.offset) {
+        throw new functions.https.HttpsError(
+          'not-found',
+          'please insert offset'
+        )
+      }
+      const offset = parseInt(req.query.offset as string)
+      try {
+        let submissionRef = admin
+          .firestore()
+          .collection('submissions')
+          .orderBy('timestamp', 'desc')
+
+        if (req.query.displayName) {
+          const userDocs = await admin
+            .firestore()
+            .collection('users')
+            .where('displayName', '==', req.query.displayName)
+            .get()
+          if (userDocs.docs.length !== 1) {
+            throw new functions.https.HttpsError(
+              'aborted',
+              'User fetching error'
+            )
+          }
+          const uid = userDocs.docs[0].id
+          submissionRef = submissionRef.where('uid', '==', uid)
+        }
+
+        if (req.query.taskID) {
+          const taskID = req.query.taskID
+          submissionRef = submissionRef.where('taskID', '==', taskID)
+        }
+
+        submissionRef.limit(offset)
+        const submissionDocs = await submissionRef.get()
+
+        const temp = []
+
+        for (const doc of submissionDocs.docs) {
+          const data = doc.data()
+
+          const userDocRef = await admin
+            .firestore()
+            .doc(`users/${data.uid}`)
+            .get()
+
+          const taskSnapshot = await admin
+            .firestore()
+            .collection('tasks')
+            .where('id', '==', data.taskID)
+            .get()
+
+          const taskDoc = taskSnapshot.docs[0].data()
+
+          const firebaseDate = new admin.firestore.Timestamp(
+            data.timestamp._seconds,
+            data.timestamp._nanoseconds
+          )
+
+          const username = userDocRef.data()?.displayName
+          const timestamp = data.timestamp
+          const humanTimestamp = firebaseDate.toDate().toLocaleString()
+          const language = data.language
+          const points = data.points
+          const taskTitle = taskDoc.title
+          let time = 0,
+            memory = 0
+
+          if (data.groups) {
+            for (const group of data.groups) {
+              for (const status of group.status) {
+                time = Math.max(time, status.time)
+                memory = Math.max(memory, status.memory)
+              }
+            }
+          }
+
+          temp.push({
+            username,
+            timestamp,
+            humanTimestamp,
+            language,
+            points,
+            taskTitle,
+            time,
+            memory,
+          })
+        }
+
+        res.send(temp)
       } catch (error) {
         throw new functions.https.HttpsError('unknown', error)
       }
