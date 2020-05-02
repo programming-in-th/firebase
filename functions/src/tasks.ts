@@ -48,13 +48,14 @@ export const getProblemMetadata = functions
           .collection('tasks')
           .where('id', '==', id)
           .get()
-
-        if (taskDocs.docs.length === 1) {
-          const data = taskDocs.docs[0].data()
-          res.send(data.visible ? data : {})
-        } else {
+        if (taskDocs.docs.length === 0) {
+          res.send({})
+        }
+        if (taskDocs.docs.length !== 1) {
           throw new functions.https.HttpsError('aborted', 'Task fetching error')
         }
+        const data = taskDocs.docs[0].data()
+        res.send(data.visible ? data : {})
       } catch (error) {
         throw new functions.https.HttpsError('unknown', error)
       }
