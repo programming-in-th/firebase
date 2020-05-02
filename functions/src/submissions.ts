@@ -158,7 +158,7 @@ export const getSubmissions = functions
         )
       }
 
-      const offset = parseInt(req.query.offset as string)
+      let offset = parseInt(req.query.offset as string)
 
       try {
         let submissionRef = admin
@@ -212,16 +212,17 @@ export const getSubmissions = functions
               data.timestamp._seconds,
               data.timestamp._nanoseconds
             )
-
+            const id = offset
             const username = userDoc.data()?.displayName
             const timestamp = data.timestamp
             const humanTimestamp = firebaseDate.toDate().toLocaleString()
             const language = data.language
             const points = data.points
             const taskTitle = task.title
+            const submissionID = doc.id
             let time = 0,
               memory = 0
-
+            offset++
             if (data.groups) {
               for (const group of data.groups) {
                 for (const status of group.status) {
@@ -232,6 +233,7 @@ export const getSubmissions = functions
             }
 
             temp.push({
+              id,
               username,
               timestamp,
               humanTimestamp,
@@ -240,6 +242,7 @@ export const getSubmissions = functions
               taskTitle,
               time,
               memory,
+              submissionID,
             })
           } else {
             temp.push({})
