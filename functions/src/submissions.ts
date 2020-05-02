@@ -189,7 +189,7 @@ export const getSubmissions = functions
           submissionRef = submissionRef.where('taskID', '==', taskID)
         }
 
-        submissionRef = submissionRef.offset(offset).limit(10)
+        submissionRef = submissionRef.offset(offset).limit(20)
         const submissionDocs = await submissionRef.get()
 
         const temp: Object[] = []
