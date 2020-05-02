@@ -246,7 +246,7 @@ export const getSubmissions = functions
           }
         }
 
-        res.send({ data: temp, offset: 10 + offset })
+        res.send({ data: temp, offset: submissionDocs.docs.length + offset })
       } catch (error) {
         throw new functions.https.HttpsError('unknown', error)
       }
