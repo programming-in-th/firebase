@@ -158,8 +158,6 @@ export const getSubmissions = functions
         )
       }
 
-      let offset = parseInt(req.query.offset as string)
-
       try {
         let submissionRef = admin
           .firestore()
@@ -193,7 +191,13 @@ export const getSubmissions = functions
           submissionRef = submissionRef.where('taskID', '==', taskID)
         }
 
-        submissionRef = submissionRef.offset(offset).limit(20)
+        let offset = 0
+
+        if (req.query.offset) {
+          offset = parseInt(req.query.offset as string)
+          submissionRef = submissionRef.offset(offset).limit(20)
+        }
+
         const submissionDocs = await submissionRef.get()
 
         const temp: Object[] = []
