@@ -223,12 +223,12 @@ export const getSubmissions = functions
               data.timestamp._seconds,
               data.timestamp._nanoseconds
             )
-            const username = userDoc.data()?.displayName
+            const displayName = userDoc.data()?.displayName
             const timestamp = data.timestamp
             const humanTimestamp = firebaseDate.toDate().toLocaleString()
             const language = data.language
             const points = data.points
-            const taskTitle = task.title
+            const taskID = task.id
             const submissionID = doc.id
             let time = 0,
               memory = 0
@@ -243,12 +243,12 @@ export const getSubmissions = functions
 
             temp.push({
               id,
-              username,
+              displayName,
               timestamp,
               humanTimestamp,
               language,
               points,
-              taskTitle,
+              taskID,
               time,
               memory,
               submissionID,
