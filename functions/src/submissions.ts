@@ -211,12 +211,14 @@ export const getSubmissions = functions
 
           const task = taskDocs.docs[0].data()
 
+          const id = offset
+          offset++
+
           if (task.visible) {
             const firebaseDate = new admin.firestore.Timestamp(
               data.timestamp._seconds,
               data.timestamp._nanoseconds
             )
-            const id = offset
             const username = userDoc.data()?.displayName
             const timestamp = data.timestamp
             const humanTimestamp = firebaseDate.toDate().toLocaleString()
@@ -226,7 +228,6 @@ export const getSubmissions = functions
             const submissionID = doc.id
             let time = 0,
               memory = 0
-            offset++
             if (data.groups) {
               for (const group of data.groups) {
                 for (const status of group.status) {
@@ -249,7 +250,7 @@ export const getSubmissions = functions
               submissionID,
             })
           } else {
-            temp.push({})
+            temp.push({ id })
           }
         }
 
