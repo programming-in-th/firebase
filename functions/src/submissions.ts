@@ -173,6 +173,10 @@ export const getSubmissions = functions
             .where('displayName', '==', req.query.displayName)
             .get()
 
+          if (userDocs.docs.length === 0) {
+            res.send([])
+          }
+
           if (userDocs.docs.length !== 1) {
             throw new functions.https.HttpsError(
               'aborted',
