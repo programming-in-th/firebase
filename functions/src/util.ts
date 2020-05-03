@@ -28,7 +28,7 @@ export const readCode = async (id: string, len: number) => {
   }
 }
 
-export const writeCode = async (id: string, code: Array<string>) => {
+export const writeCode = async (id: string, code: string[]) => {
   try {
     for (let i = 0; i < code.length; ++i) {
       const tempPath = path.join(os.tmpdir(), i.toString())

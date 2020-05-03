@@ -25,7 +25,7 @@ export const getUserContext = functions
   .region('asia-east2')
   .https.onCall(
     async (
-      request_data: functions.https.Request,
+      requestData: functions.https.Request,
       context: functions.https.CallableContext
     ) => {
       if (!context.auth) return initialUser
