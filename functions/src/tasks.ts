@@ -73,6 +73,7 @@ export const getTask = functions
         const taskDoc = await admin.firestore().doc(`tasks/${id}`).get()
         const data = taskDoc.data()
         if (data) {
+          data.id = taskDoc.id
           res.send(data.visible ? data : {})
         } else {
           res.send({})
