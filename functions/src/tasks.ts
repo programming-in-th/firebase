@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 
-export const getAllTasks = functions
+export const getTasks = functions
   .region('asia-east2')
   .https.onRequest(
     async (req: functions.https.Request, res: functions.Response) => {
@@ -18,6 +18,7 @@ export const getAllTasks = functions
 
         for (const doc of taskDocs.docs) {
           const data = doc.data()
+          data.id = doc.id
           result.push(data)
         }
 
@@ -28,7 +29,7 @@ export const getAllTasks = functions
     }
   )
 
-export const getAllProblemIDs = functions
+export const getTaskIDs = functions
   .region('asia-east2')
   .https.onRequest(
     async (req: functions.https.Request, res: functions.Response) => {
@@ -41,11 +42,10 @@ export const getAllProblemIDs = functions
           .where('visible', '==', true)
           .get()
 
-        const result: Object[] = []
+        const result: string[] = []
 
         for (const doc of taskDocs.docs) {
-          const data = doc.data()
-          result.push(data.id)
+          result.push(doc.id)
         }
 
         res.send(result)
@@ -55,7 +55,7 @@ export const getAllProblemIDs = functions
     }
   )
 
-export const getProblemMetadata = functions
+export const getTask = functions
   .region('asia-east2')
   .https.onRequest(
     async (req: functions.https.Request, res: functions.Response) => {
@@ -70,19 +70,13 @@ export const getProblemMetadata = functions
       }
 
       try {
-        const taskDocs = await admin
-          .firestore()
-          .collection('tasks')
-          .where('id', '==', id)
-          .get()
-        if (taskDocs.docs.length === 0) {
+        const taskDoc = await admin.firestore().doc(`tasks/${id}`).get()
+        const data = taskDoc.data()
+        if (data) {
+          res.send(data.visible ? data : {})
+        } else {
           res.send({})
         }
-        if (taskDocs.docs.length !== 1) {
-          throw new functions.https.HttpsError('aborted', 'Task fetching error')
-        }
-        const data = taskDocs.docs[0].data()
-        res.send(data.visible ? data : {})
       } catch (error) {
         throw new functions.https.HttpsError('unknown', error)
       }

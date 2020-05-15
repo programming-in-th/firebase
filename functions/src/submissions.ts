@@ -36,45 +36,42 @@ export const makeSubmission = functions
       }
 
       try {
-        const taskDocs = await admin
-          .firestore()
-          .collection('tasks')
-          .where('id', '==', id)
-          .get()
+        const taskDoc = await admin.firestore().doc(`tasks/${id}`).get()
 
-        if (taskDocs.docs.length === 1) {
-          const task = taskDocs.docs[0].data()
+        const task = taskDoc.data()
 
-          if (task.visible === true || isAdmin(context)) {
-            if (typeof code === 'string') {
-              code = await unzipCode(code, task.fileName)
+        if (!task) {
+          throw new functions.https.HttpsError('data-loss', 'Task not found')
+        }
 
-              if (!Array.isArray(code)) {
-                throw new functions.https.HttpsError(
-                  'invalid-argument',
-                  'Code must be in ZIP format or array'
-                )
-              }
+        const taskID = taskDoc.id
+        if (task.visible === true || isAdmin(context)) {
+          if (typeof code === 'string') {
+            code = await unzipCode(code, task.fileName)
+
+            if (!Array.isArray(code)) {
+              throw new functions.https.HttpsError(
+                'invalid-argument',
+                'Code must be in ZIP format or array'
+              )
             }
-            const submissionID = (
-              await admin.firestore().collection('submissions').add({
-                taskID: id,
-                language: lang,
-                points: -1,
-                timestamp: admin.firestore.Timestamp.now(),
-                uid: uid,
-              })
-            ).id
-            await writeCode(submissionID, code)
-            return submissionID
-          } else {
-            throw new functions.https.HttpsError(
-              'permission-denied',
-              'Task Permission denied'
-            )
           }
+
+          const submissionID = (
+            await admin.firestore().collection('submissions').add({
+              taskID,
+              language: lang,
+              timestamp: admin.firestore.Timestamp.now(),
+              uid,
+            })
+          ).id
+          await writeCode(submissionID, code)
+          return submissionID
         } else {
-          throw new functions.https.HttpsError('aborted', 'Task fetching error')
+          throw new functions.https.HttpsError(
+            'permission-denied',
+            'Task Permission denied'
+          )
         }
       } catch (error) {
         throw new functions.https.HttpsError('unknown', error)
@@ -82,7 +79,7 @@ export const makeSubmission = functions
     }
   )
 
-export const getDetailedSubmissionData = functions
+export const getSubmission = functions
   .region('asia-east2')
   .https.onCall(
     async (requestData: any, context: functions.https.CallableContext) => {
@@ -101,20 +98,29 @@ export const getDetailedSubmissionData = functions
           .get()
         const submission = submissionDoc.data()
 
-        const taskID = submission?.taskID
-        const taskDocs = await admin
-          .firestore()
-          .collection('tasks')
-          .where('id', '==', taskID)
-          .get()
-        const task = taskDocs.docs[0].data()
+        if (!submission) {
+          throw new functions.https.HttpsError(
+            'data-loss',
+            'Submission not found'
+          )
+        }
+
+        const taskID = submission.taskID
+        const taskDoc = await admin.firestore().doc(`tasks/${taskID}`).get()
+
+        const task = taskDoc.data()
+
+        if (!task) {
+          throw new functions.https.HttpsError('data-loss', 'Task not found')
+        }
+        task.id = taskDoc.id
 
         if (!(task.visible || isAdmin(context))) {
           return {}
         }
         const firebaseDate = new admin.firestore.Timestamp(
-          submission?.timestamp._seconds,
-          submission?.timestamp._nanoseconds
+          submission.timestamp._seconds,
+          submission.timestamp._nanoseconds
         )
 
         const humanTimestamp = firebaseDate.toDate().toLocaleString()
@@ -125,16 +131,16 @@ export const getDetailedSubmissionData = functions
 
         const userDoc = await admin
           .firestore()
-          .doc(`users/${submission?.uid}`)
+          .doc(`users/${submission.uid}`)
           .get()
         const user = userDoc.data()
 
-        delete submission?.uid
+        if (!user) {
+          throw new functions.https.HttpsError('data-loss', 'User not found')
+        }
 
         return {
-          ...submission,
-          username: user?.displayName,
-          ID: submissionID,
+          displayName: user.displayName,
           task,
           humanTimestamp,
           code,
@@ -220,13 +226,16 @@ export const getSubmissions = functions
             const timestamp = data.timestamp
             const humanTimestamp = firebaseDate.toDate().toLocaleString()
             const language = data.language
-            const points = data.points
+            let score = 0
+            let fullScore = 0
             const taskID = task.id
             const submissionID = doc.id
             let time = 0,
               memory = 0
             if (data.groups) {
               for (const group of data.groups) {
+                score = Math.max(score, group.score)
+                fullScore = Math.max(fullScore, group.fullScore)
                 for (const status of group.status) {
                   time = Math.max(time, status.time)
                   memory = Math.max(memory, status.memory)
@@ -240,7 +249,8 @@ export const getSubmissions = functions
               timestamp,
               humanTimestamp,
               language,
-              points,
+              score,
+              fullScore,
               taskID,
               time,
               memory,
