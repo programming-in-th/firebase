@@ -140,7 +140,8 @@ export const getSubmission = functions
         }
 
         return {
-          displayName: user.displayName,
+          ...submission,
+          username: user.username,
           task,
           humanTimestamp,
           code,
@@ -163,11 +164,11 @@ export const getSubmissions = functions
           .collection('submissions')
           .orderBy('timestamp', 'desc')
 
-        if (req.query.displayName) {
+        if (req.query.username) {
           const userDocs = await admin
             .firestore()
             .collection('users')
-            .where('displayName', '==', req.query.displayName)
+            .where('username', '==', req.query.username)
             .get()
 
           if (userDocs.docs.length === 0) {
@@ -206,13 +207,22 @@ export const getSubmissions = functions
 
           const userDoc = await admin.firestore().doc(`users/${data.uid}`).get()
 
-          const taskDocs = await admin
+          const user = userDoc.data()
+
+          if (!user) {
+            throw new functions.https.HttpsError('data-loss', 'User not found')
+          }
+
+          const taskDoc = await admin
             .firestore()
-            .collection('tasks')
-            .where('id', '==', data.taskID)
+            .doc(`tasks/${data.taskID}`)
             .get()
 
-          const task = taskDocs.docs[0].data()
+          const task = taskDoc.data()
+
+          if (!task) {
+            throw new functions.https.HttpsError('data-loss', 'Task not found')
+          }
 
           const id = offset
           offset++
@@ -222,7 +232,7 @@ export const getSubmissions = functions
               data.timestamp._seconds,
               data.timestamp._nanoseconds
             )
-            const displayName = userDoc.data()?.displayName
+            const username = user.username
             const timestamp = data.timestamp
             const humanTimestamp = firebaseDate.toDate().toLocaleString()
             const language = data.language
@@ -245,7 +255,7 @@ export const getSubmissions = functions
 
             temp.push({
               id,
-              displayName,
+              username,
               timestamp,
               humanTimestamp,
               language,
