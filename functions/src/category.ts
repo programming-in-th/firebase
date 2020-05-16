@@ -8,9 +8,9 @@ export const getCategory = functions
       res.set('Access-Control-Allow-Origin', '*')
       const categoryDocs = await admin.firestore().collection('category').get()
       const tmp: { [key: string]: Object } = {}
-      for (let i = 0; i < categoryDocs.docs.length; ++i) {
-        const data = categoryDocs.docs[i].data()
-        const id = categoryDocs.docs[i].id
+      for (const doc of categoryDocs.docs) {
+        const data = doc.data()
+        const id = doc.id
         tmp[id] = data
       }
       res.send(tmp)

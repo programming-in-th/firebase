@@ -201,8 +201,8 @@ export const getSubmissions = functions
         const submissionDocs = await submissionRef.get()
 
         const temp: Object[] = []
-        for (let i = 0; i < submissionDocs.docs.length; ++i) {
-          const data = submissionDocs.docs[i].data()
+        for (const doc of submissionDocs.docs) {
+          const data = doc.data()
           const userDoc = await admin.firestore().doc(`users/${data.uid}`).get()
           const user = userDoc.data()
 
@@ -241,21 +241,12 @@ export const getSubmissions = functions
               memory = 0
 
             if (data.groups) {
-<<<<<<< HEAD
-              for (let i = 0; i < data.groups.length; ++i) {
-                score = score + data.groups[i].score
-                fullScore = fullScore + data.groups[i].fullScore
-                for (let j = 0; j < data.groups[i].status.length; ++j) {
-                  time = Math.max(time, data.groups[i].status[j].time)
-                  memory = Math.max(memory, data.groups[i].status[j].memory)
-=======
               for (const group of data.groups) {
-                score = Math.max(score, group.score)
-                fullScore = Math.max(fullScore, group.fullScore)
+                score += group.score
+                fullScore += group.fullScore
                 for (const status of group.status) {
                   time = Math.max(time, status.time)
                   memory = Math.max(memory, status.memory)
->>>>>>> parent of d9d97b8... Fixed Calculate score in getSubmissions
                 }
               }
             }
