@@ -53,8 +53,8 @@ export const unzipCode = async (code: string, fileName: string[]) => {
   )
   const returnArray: string[] = []
 
-  for (const element of fileName) {
-    const elementPath = path.join(os.tmpdir(), tempID, element)
+  for (let i = 0; i < fileName.length; ++i) {
+    const elementPath = path.join(os.tmpdir(), tempID, fileName[i])
     let codeRead = ''
 
     if (fs.existsSync(elementPath)) {

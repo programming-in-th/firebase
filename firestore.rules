@@ -1,0 +1,14 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function checkVisible() {
+    	return get(/databases/$(database)/documents/tasks/$(resource.data.taskID)).data.visible == true;
+    }	
+    function checkAdmin() {
+    	return get(/databases/$(database)/documents/users/$(resource.data.uid)).data.admin == true;
+    }
+    match /submissions/{document=**} {
+    	allow read: if checkVisible() || checkAdmin();
+    }
+  }
+}

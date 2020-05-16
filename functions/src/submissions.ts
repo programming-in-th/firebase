@@ -201,12 +201,9 @@ export const getSubmissions = functions
         const submissionDocs = await submissionRef.get()
 
         const temp: Object[] = []
-
-        for (const doc of submissionDocs.docs) {
-          const data = doc.data()
-
+        for (let i = 0; i < submissionDocs.docs.length; ++i) {
+          const data = submissionDocs.docs[i].data()
           const userDoc = await admin.firestore().doc(`users/${data.uid}`).get()
-
           const user = userDoc.data()
 
           if (!user) {
@@ -236,19 +233,29 @@ export const getSubmissions = functions
             const timestamp = data.timestamp
             const humanTimestamp = firebaseDate.toDate().toLocaleString()
             const language = data.language
-            let score = 0
-            let fullScore = 0
             const taskID = taskDoc.id
-            const submissionID = doc.id
-            let time = 0,
+            const submissionID = submissionDocs.docs[i].id
+            let score = 0,
+              fullScore = 0,
+              time = 0,
               memory = 0
+
             if (data.groups) {
+<<<<<<< HEAD
+              for (let i = 0; i < data.groups.length; ++i) {
+                score = score + data.groups[i].score
+                fullScore = fullScore + data.groups[i].fullScore
+                for (let j = 0; j < data.groups[i].status.length; ++j) {
+                  time = Math.max(time, data.groups[i].status[j].time)
+                  memory = Math.max(memory, data.groups[i].status[j].memory)
+=======
               for (const group of data.groups) {
                 score = Math.max(score, group.score)
                 fullScore = Math.max(fullScore, group.fullScore)
                 for (const status of group.status) {
                   time = Math.max(time, status.time)
                   memory = Math.max(memory, status.memory)
+>>>>>>> parent of d9d97b8... Fixed Calculate score in getSubmissions
                 }
               }
             }

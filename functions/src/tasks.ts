@@ -16,9 +16,9 @@ export const getTasks = functions
 
         const result: Object[] = []
 
-        for (const doc of taskDocs.docs) {
-          const data = doc.data()
-          data.id = doc.id
+        for (let i = 0; i < taskDocs.docs.length; ++i) {
+          const data = taskDocs.docs[i].data()
+          data.id = taskDocs.docs[i].id
           result.push(data)
         }
 
@@ -44,8 +44,8 @@ export const getTaskIDs = functions
 
         const result: string[] = []
 
-        for (const doc of taskDocs.docs) {
-          result.push(doc.id)
+        for (let i = 0; i < taskDocs.docs.length; ++i) {
+          result.push(taskDocs.docs[i].id)
         }
 
         res.send(result)
