@@ -1,13 +1,61 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 
+interface category {
+  id: string
+  name: string
+  path?: category[]
+}
+
+interface rawCategory {
+  id: string
+  name: string
+  path?: string[]
+}
+
 export const getCategory = functions
   .region('asia-east2')
   .https.onRequest(
     async (req: functions.https.Request, res: functions.Response) => {
       res.set('Access-Control-Allow-Origin', '*')
-      const doc = await admin.firestore().doc('constant/category').get()
-      const data = doc.data()?.data
-      res.send(data)
+
+      const categories = await admin.firestore().collection('category').get()
+      const categoryMap: { [key: string]: rawCategory } = {}
+
+      for (const doc of categories.docs) {
+        const data = doc.data()
+        categoryMap[doc.id] = data as rawCategory
+      }
+
+      const getChild = async (docRef: string): Promise<category> => {
+        const data = categoryMap[docRef]
+        const path: category[] = []
+
+        if (data.path) {
+          for (const child of data.path) {
+            const ret = await getChild(child)
+            path.push(ret)
+          }
+        }
+
+        const tmp: category = {
+          name: data.name,
+          id: data.id,
+          path: path.length === 0 ? undefined : path,
+        }
+
+        return tmp
+      }
+
+      const tmp: category[] = []
+
+      if (categoryMap['root'].path) {
+        for (const doc of categoryMap['root'].path) {
+          const now = await getChild(doc)
+          tmp.push(now)
+        }
+      }
+
+      res.send(tmp)
     }
   )
