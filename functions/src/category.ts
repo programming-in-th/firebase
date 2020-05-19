@@ -27,13 +27,13 @@ export const getCategory = functions
         categoryMap[doc.id] = data as rawCategory
       }
 
-      const getChild = async (docRef: string): Promise<category> => {
+      const getChild = (docRef: string): category => {
         const data = categoryMap[docRef]
         const path: category[] = []
 
         if (data.path) {
           for (const child of data.path) {
-            const ret = await getChild(child)
+            const ret = getChild(child)
             path.push(ret)
           }
         }
@@ -51,7 +51,7 @@ export const getCategory = functions
 
       if (categoryMap['root'].path) {
         for (const doc of categoryMap['root'].path) {
-          const now = await getChild(doc)
+          const now = getChild(doc)
           tmp.push(now)
         }
       }
