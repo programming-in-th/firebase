@@ -38,13 +38,13 @@ export const getCategory = functions
           }
         }
 
-        const tmp: category = {
+        const toReturn: category = {
           name: data.name,
           id: data.id,
           path: path.length === 0 ? undefined : path,
         }
 
-        return tmp
+        return toReturn
       }
 
       const tmp: category[] = []
