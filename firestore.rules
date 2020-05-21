@@ -5,7 +5,7 @@ service cloud.firestore {
     	return get(/databases/$(database)/documents/tasks/$(resource.data.taskID)).data.visible == true;
     }	
     function checkAdmin() {
-    	return get(/databases/$(database)/documents/users/$(resource.data.uid)).data.admin == true;
+    	return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == true;
     }
     match /submissions/{document=**} {
     	allow read: if checkVisible() || checkAdmin();
