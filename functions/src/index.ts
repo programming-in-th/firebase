@@ -4,7 +4,5 @@ admin.initializeApp({
 })
 // No need to initialize with service account credentials
 
-export * from './tasks'
-export * from './category'
 export * from './submissions'
 export * from './users'
