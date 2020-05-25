@@ -4,7 +4,6 @@ import * as admin from 'firebase-admin'
 const initialUser = {
   username: '',
   admin: false,
-  codeTheme: 'material',
 }
 
 export const onRegister = functions
@@ -28,7 +27,7 @@ export const getUserContext = functions
       requestData: functions.https.Request,
       context: functions.https.CallableContext
     ) => {
-      if (!context.auth) return initialUser
+      if (!context.auth) return {}
       try {
         const uid = context.auth.uid
         const userDoc = await admin.firestore().doc(`users/${uid}`).get()
