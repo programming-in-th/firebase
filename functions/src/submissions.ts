@@ -172,7 +172,8 @@ export const getSubmissions = functions
             .get()
 
           if (userDocs.docs.length === 0) {
-            res.send([])
+            res.send({ results: [], next: null })
+            return
           }
 
           if (userDocs.docs.length !== 1) {
@@ -192,16 +193,21 @@ export const getSubmissions = functions
         }
 
         let offset = 0
+        let limit = 10
+
+        if (req.query.limit) {
+          limit = parseInt(req.query.limit as string)
+        }
 
         if (req.query.offset) {
           offset = parseInt(req.query.offset as string)
-          submissionRef = submissionRef.offset(offset).limit(20)
         }
 
-        const submissionDocs = await submissionRef.get()
+        const getSubmissionRef = submissionRef.offset(offset).limit(limit)
+        const getSubmissionDocs = await getSubmissionRef.get()
 
         const temp: Object[] = []
-        for (const doc of submissionDocs.docs) {
+        for (const doc of getSubmissionDocs.docs) {
           const data = doc.data()
           const userDoc = await admin.firestore().doc(`users/${data.uid}`).get()
           const user = userDoc.data()
@@ -220,9 +226,6 @@ export const getSubmissions = functions
           if (!task) {
             throw new functions.https.HttpsError('data-loss', 'Task not found')
           }
-
-          const id = offset
-          offset++
 
           if (task.visible) {
             const firebaseDate = new admin.firestore.Timestamp(
@@ -252,7 +255,6 @@ export const getSubmissions = functions
             }
 
             temp.push({
-              id,
               username,
               timestamp,
               humanTimestamp,
@@ -265,11 +267,16 @@ export const getSubmissions = functions
               submissionID,
             })
           } else {
-            temp.push({ id })
+            temp.push({})
           }
         }
 
-        res.send(temp)
+        let next = null
+
+        const checkSubmissionRef = submissionRef.offset(offset + limit).limit(1)
+        const checkSubmissionDocs = await checkSubmissionRef.get()
+        if (checkSubmissionDocs.docs.length !== 0) next = offset + limit
+        res.send({ results: temp, next })
       } catch (error) {
         throw new functions.https.HttpsError('unknown', error)
       }
