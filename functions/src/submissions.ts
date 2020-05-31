@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import { unzipCode, readCode, writeCode, isAdmin } from './util'
+import * as crypto from 'crypto'
 
 export const makeSubmission = functions
   .region('asia-east2')
@@ -140,7 +141,6 @@ export const getSubmission = functions
         }
 
         return {
-          ...submission,
           username: user.username,
           task,
           humanTimestamp,
@@ -177,10 +177,19 @@ export const getSubmissions = functions
           }
 
           if (userDocs.docs.length !== 1) {
-            throw new functions.https.HttpsError(
-              'aborted',
-              'User fetching error'
-            )
+            const tmp: string[] = []
+            for (const data of userDocs.docs) {
+              tmp.push(data.id)
+            }
+            for (const data of tmp) {
+              const tmpID = crypto.randomBytes(20).toString('hex')
+              await admin
+                .firestore()
+                .doc(`users/${data}`)
+                .update({ username: tmpID })
+            }
+            res.send({ results: [], next: null })
+            return
           }
 
           const uid = userDocs.docs[0].id
