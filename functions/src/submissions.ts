@@ -45,7 +45,8 @@ export const makeSubmission = functions
         }
 
         const taskID = taskDoc.id
-        if (task.visible === true || isAdmin(context)) {
+        const userAdmin = await isAdmin(context)
+        if (task.visible === true || userAdmin) {
           if (typeof code === 'string') {
             code = await unzipCode(code, task.fileName)
 
@@ -114,8 +115,9 @@ export const getSubmission = functions
           throw new functions.https.HttpsError('data-loss', 'Task not found')
         }
         task.id = taskDoc.id
+        const userAdmin = await isAdmin(context)
 
-        if (!(task.visible || isAdmin(context))) {
+        if (!(task.visible || userAdmin)) {
           return {}
         }
         const firebaseDate = new admin.firestore.Timestamp(
