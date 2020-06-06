@@ -18,3 +18,5 @@ jobs:
       working-directory: functions
     - run: npm run lint
       working-directory: functions
+    - run: npm run-script build
+      working-directory: functions
