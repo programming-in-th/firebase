@@ -1,10 +1,6 @@
 name: Functions Testing
 
-on:
-  push:
-    branches:
-      - master
-      - 'functions**'
+on: [push, pull_request]
 
 jobs:
   build:
@@ -21,4 +17,6 @@ jobs:
     - run: npm ci
       working-directory: functions
     - run: npm run lint
+      working-directory: functions
+    - run: npm run-script build
       working-directory: functions
