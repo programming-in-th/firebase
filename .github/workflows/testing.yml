@@ -1,10 +1,6 @@
 name: Functions Testing
 
-on:
-  push:
-    branches:
-      - master
-      - 'functions**'
+on: [push, pull_request]
 
 jobs:
   build:
