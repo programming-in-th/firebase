@@ -16,7 +16,7 @@ Contains all back-end code
 Change directory to `functions` and run `npm run-script dev`
 
 To make requests to the local server,
-add `.useFunctionsEmulator()` to `src/lib/firebase.ts` and change baseURL in `src/config.ts`
+add `.useFunctionsEmulator()` to `firebase.app().functions('asia-east2')` in `src/lib/firebase.ts` and change base URL in `src/config.ts`
 
 ## Deploy
 
