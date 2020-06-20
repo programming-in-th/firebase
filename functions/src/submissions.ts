@@ -46,6 +46,7 @@ export const makeSubmission = functions
 
         const taskID = taskDoc.id
         const userAdmin = await isAdmin(context)
+
         if (task.visible === true || userAdmin) {
           if (typeof code === 'string') {
             code = await unzipCode(code, task.fileName)
@@ -58,15 +59,32 @@ export const makeSubmission = functions
             }
           }
 
+          const fullScore = task.fullScore
+
+          let codelen = 0
+          for (const icode of code) {
+            codelen += icode.length
+          }
+
           const submissionID = (
             await admin.firestore().collection('submissions').add({
               taskID,
+              score: 0,
+              fullScore,
+              time: 0,
+              memory: 0,
               language: lang,
+              groups: [],
+              codelen,
               timestamp: admin.firestore.Timestamp.now(),
               uid,
+              verdict: 'Sending',
             })
           ).id
           await writeCode(submissionID, code)
+          await admin.firestore().doc(`submissions/${submissionID}`).update({
+            verdict: 'Pending',
+          })
           return submissionID
         } else {
           throw new functions.https.HttpsError(
@@ -240,21 +258,10 @@ export const getSubmissions = functions
             const language = data.language
             const taskID = taskDoc.id
             const submissionID = doc.id
-            let score = 0,
-              fullScore = 0,
-              time = 0,
-              memory = 0
-
-            if (data.groups) {
-              for (const group of data.groups) {
-                score += group.score
-                fullScore += group.fullScore
-                for (const status of group.status) {
-                  time = Math.max(time, status.time)
-                  memory = Math.max(memory, status.memory)
-                }
-              }
-            }
+            const score = data.score
+            const fullScore = data.fullScore
+            const time = data.time
+            const memory = data.memory
 
             temp.push({
               username,
