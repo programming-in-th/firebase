@@ -46,6 +46,7 @@ export const makeSubmission = functions
 
         const taskID = taskDoc.id
         const userAdmin = await isAdmin(context)
+
         if (task.visible === true || userAdmin) {
           if (typeof code === 'string') {
             code = await unzipCode(code, task.fileName)
@@ -57,15 +58,19 @@ export const makeSubmission = functions
               )
             }
           }
+
+          const fullScore = task.fullScore
+
           let codelen = 0
           for (const icode of code) {
             codelen += icode.length
           }
+
           const submissionID = (
             await admin.firestore().collection('submissions').add({
               taskID,
               score: 0,
-              fullScore: 100,
+              fullScore,
               time: 0,
               memory: 0,
               language: lang,
