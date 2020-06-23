@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import { unzipCode, writeCode, isAdmin } from '../util'
 
-const makeSubmission = functions
+exports = module.exports = functions
   .region('asia-east2')
   .https.onCall(
     async (requestData: any, context: functions.https.CallableContext) => {
@@ -97,5 +97,3 @@ const makeSubmission = functions
       }
     }
   )
-
-export default makeSubmission

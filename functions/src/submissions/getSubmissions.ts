@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 
-const getSubmissions = functions
+exports = module.exports = functions
   .region('asia-east2')
   .https.onRequest(
     async (req: functions.https.Request, res: functions.Response) => {
@@ -120,5 +120,3 @@ const getSubmissions = functions
       }
     }
   )
-
-export default getSubmissions

@@ -6,7 +6,7 @@ const initialUser = {
   admin: false,
 }
 
-const onRegister = functions
+exports = module.exports = functions
   .region('asia-east2')
   .auth.user()
   .onCreate(
@@ -19,5 +19,3 @@ const onRegister = functions
       }
     }
   )
-
-export default onRegister

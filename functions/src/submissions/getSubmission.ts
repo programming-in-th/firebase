@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import { readCode, isAdmin } from '../util'
 
-const getSubmission = functions
+exports = module.exports = functions
   .region('asia-east2')
   .https.onCall(
     async (requestData: any, context: functions.https.CallableContext) => {
@@ -68,5 +68,3 @@ const getSubmission = functions
       }
     }
   )
-
-export default getSubmission

@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 
-const setUsername = functions
+exports = module.exports = functions
   .region('asia-east2')
   .https.onCall(
     async (requestData: any, context: functions.https.CallableContext) => {
@@ -26,5 +26,3 @@ const setUsername = functions
       }
     }
   )
-
-export default setUsername
