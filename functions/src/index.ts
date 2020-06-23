@@ -6,7 +6,7 @@ admin.initializeApp({
 
 const function_name = process.env.FUNCTION_NAME || process.env.K_SERVICE
 
-if (!function_name || function_name === 'makeSubmisson') {
+if (!function_name || function_name === 'makeSubmission') {
   exports.makeSubmission = require('./submissions/makeSubmission')
 }
 
