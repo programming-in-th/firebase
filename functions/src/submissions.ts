@@ -138,12 +138,6 @@ export const getSubmission = functions
         if (!(task.visible || userAdmin)) {
           return {}
         }
-        const firebaseDate = new admin.firestore.Timestamp(
-          submission.timestamp._seconds,
-          submission.timestamp._nanoseconds
-        )
-
-        const humanTimestamp = firebaseDate.toDate().toLocaleString()
 
         const codelen = task.type === 'normal' ? 1 : task.fileName.length
 
@@ -163,7 +157,6 @@ export const getSubmission = functions
           ...submission,
           username: user.username,
           task,
-          humanTimestamp,
           code,
         }
       } catch (error) {
