@@ -139,6 +139,15 @@ export const getSubmission = functions
           return {}
         }
 
+        const time = new Date(
+          submission.timestamp.seconds * 1000 + 7 * 60 * 60 * 1000
+        )
+        const dd = (time.getDate() < 10 ? '0' : '') + time.getDate()
+        const mm = (time.getMonth() < 10 ? 1 : 0) + time.getMonth()
+        const yyyy = time.getFullYear() + 543
+        const tt = time.toString().substring(16, 24)
+        const humanTimestamp = `${dd}/${mm}/${yyyy} ${tt}`
+
         const codelen = task.type === 'normal' ? 1 : task.fileName.length
 
         const code = await readCode(submissionID, codelen)
@@ -156,6 +165,7 @@ export const getSubmission = functions
         return {
           ...submission,
           username: user.username,
+          humanTimestamp,
           task,
           code,
         }
