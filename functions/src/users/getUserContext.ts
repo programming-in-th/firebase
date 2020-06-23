@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 
-export const getUserContext = functions
+const getUserContext = functions
   .region('asia-east2')
   .https.onCall(
     async (
