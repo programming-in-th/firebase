@@ -78,12 +78,12 @@ exports = module.exports = functions
               codelen,
               timestamp: admin.firestore.Timestamp.now(),
               uid,
-              verdict: 'Sending',
+              status: 'Sending',
             })
           ).id
           await writeCode(submissionID, code)
           await admin.firestore().doc(`submissions/${submissionID}`).update({
-            verdict: 'Pending',
+            status: 'Pending',
           })
           return submissionID
         } else {
