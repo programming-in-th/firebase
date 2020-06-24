@@ -77,13 +77,8 @@ exports = module.exports = functions
           }
 
           if (task.visible) {
-            const firebaseDate = new admin.firestore.Timestamp(
-              data.timestamp._seconds,
-              data.timestamp._nanoseconds
-            )
             const username = user.username
             const timestamp = data.timestamp
-            const humanTimestamp = firebaseDate.toDate().toLocaleString()
             const language = data.language
             const taskID = taskDoc.id
             const submissionID = doc.id
@@ -95,7 +90,6 @@ exports = module.exports = functions
             temp.push({
               username,
               timestamp,
-              humanTimestamp,
               language,
               score,
               fullScore,
