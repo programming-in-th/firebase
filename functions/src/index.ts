@@ -18,6 +18,10 @@ if (!function_name || function_name === 'getSubmissions') {
   exports.getSubmissions = require('./submissions/getSubmissions')
 }
 
+if (!function_name || function_name === 'rejudgeSubmission') {
+  exports.rejudgeSubmission = require('./submissions/rejudgeSubmission')
+}
+
 if (!function_name || function_name === 'getUserContext') {
   exports.getUserContext = require('./users/getUserContext')
 }
