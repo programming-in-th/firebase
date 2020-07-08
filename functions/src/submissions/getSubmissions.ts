@@ -21,7 +21,7 @@ exports = module.exports = functions
             .get()
 
           if (userDocs.docs.length === 0) {
-            res.send({ results: [], next: null })
+            res.send({ data: [], next: null })
             return
           }
 
@@ -41,22 +41,30 @@ exports = module.exports = functions
           submissionRef = submissionRef.where('taskID', '==', taskID)
         }
 
-        let offset = 0
+        if (req.query.next) {
+          const submissionDoc = await admin
+            .firestore()
+            .doc(`submissions/${req.query.next}`)
+            .get()
+          submissionRef = submissionRef.startAt(submissionDoc)
+        }
+
         let limit = 10
 
         if (req.query.limit) {
           limit = parseInt(req.query.limit as string)
         }
 
-        if (req.query.offset) {
-          offset = parseInt(req.query.offset as string)
-        }
-
-        const getSubmissionRef = submissionRef.offset(offset).limit(limit)
+        const getSubmissionRef = submissionRef.limit(limit + 1)
         const getSubmissionDocs = await getSubmissionRef.get()
 
         const temp: Object[] = []
-        for (const doc of getSubmissionDocs.docs) {
+        for (
+          let i = 0;
+          i < Math.min(limit, getSubmissionDocs.docs.length);
+          ++i
+        ) {
+          const doc = getSubmissionDocs.docs[i]
           const data = doc.data()
           const userDoc = await admin.firestore().doc(`users/${data.uid}`).get()
           const user = userDoc.data()
@@ -105,10 +113,11 @@ exports = module.exports = functions
 
         let next = null
 
-        const checkSubmissionRef = submissionRef.offset(offset + limit).limit(1)
-        const checkSubmissionDocs = await checkSubmissionRef.get()
-        if (checkSubmissionDocs.docs.length !== 0) next = offset + limit
-        res.send({ results: temp, next })
+        if (getSubmissionDocs.docs.length === limit + 1) {
+          next = getSubmissionDocs.docs[limit].id
+        }
+
+        res.send({ data: temp, next })
       } catch (error) {
         throw new functions.https.HttpsError('unknown', error)
       }
